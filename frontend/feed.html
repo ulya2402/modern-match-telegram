@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Discovery Feed</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = { theme: { extend: { colors: { "primary": "#1a1a1a", "secondary": "#e63b2e", "tertiary": "#0055ff", "background": "#f5f0e8", "surface": "#f5f0e8", "primary-container": "#ffcc00" }, fontFamily: { "headline": ["Space Grotesk", "sans-serif"], "body": ["Inter", "sans-serif"] } } } }
+    </script>
+    <style>
+        body { background-color: theme('colors.background'); color: theme('colors.primary'); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; margin: 0; }
+        .card-container { position: relative; flex: 1; margin: 1rem; perspective: 1000px; }
+        .tinder-card { position: absolute; width: 100%; height: 100%; background: white; border: 4px solid theme('colors.primary'); box-shadow: 8px 8px 0px 0px theme('colors.primary'); transform-origin: 50% 100%; transition: transform 0.3s ease, opacity 0.3s ease; overflow: hidden; display: flex; flex-direction: column; will-change: transform; }
+        .tinder-card img { flex: 1; object-fit: cover; width: 100%; min-height: 50%; border-bottom: 4px solid theme('colors.primary'); pointer-events: none; }
+        .badge { position: absolute; top: 20px; padding: 5px 10px; border: 4px solid; font-family: 'Space Grotesk'; font-weight: 900; font-size: 2rem; text-transform: uppercase; border-radius: 10px; opacity: 0; z-index: 10; pointer-events: none; }
+        .badge-like { right: 20px; color: theme('colors.tertiary'); border-color: theme('colors.tertiary'); transform: rotate(15deg); }
+        .badge-nope { left: 20px; color: theme('colors.secondary'); border-color: theme('colors.secondary'); transform: rotate(-15deg); }
+        #matchOverlay { display: none; position: absolute; inset: 0; background: rgba(26,26,26,0.95); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; color: theme('colors.primary-container'); text-align: center; padding: 2rem; }
+        #matchOverlay.active { display: flex; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body class="font-body antialiased max-w-md mx-auto w-full relative border-x-4 border-primary">
+
+    <header class="p-4 border-b-4 border-primary bg-surface flex justify-between items-center z-10 shrink-0">
+        <h1 data-i18n="feed_title" class="font-headline font-black text-3xl uppercase tracking-tighter">DISCOVER</h1>
+        <button class="material-symbols-outlined text-3xl hover:text-secondary">tune</button>
+    </header>
+
+    <div id="cardStack" class="card-container"></div>
+
+    <div class="p-4 flex justify-center gap-6 z-10 shrink-0 pb-20">
+        <button id="btnPass" class="w-16 h-16 rounded-full border-4 border-primary bg-surface flex items-center justify-center text-secondary shadow-[4px_4px_0px_0px_#1a1a1a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"><span class="material-symbols-outlined text-4xl font-bold">close</span></button>
+        <button id="btnLike" class="w-16 h-16 rounded-full border-4 border-primary bg-surface flex items-center justify-center text-tertiary shadow-[4px_4px_0px_0px_#1a1a1a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"><span class="material-symbols-outlined text-4xl font-bold">favorite</span></button>
+    </div>
+
+    <nav class="absolute bottom-0 w-full bg-surface border-t-4 border-primary p-3 flex justify-around items-center z-20">
+        <button onclick="goTo('feed.html')" class="flex flex-col items-center text-primary"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">style</span><span data-i18n="nav_feed" class="text-[10px] font-bold font-headline">FEED</span></button>
+        <button onclick="goTo('likes.html')" class="flex flex-col items-center opacity-50 hover:opacity-100"><span class="material-symbols-outlined">favorite</span><span data-i18n="nav_likes" class="text-[10px] font-bold font-headline">LIKES</span></button>
+        <button onclick="goTo('matches.html')" class="flex flex-col items-center opacity-50 hover:opacity-100"><span class="material-symbols-outlined">forum</span><span data-i18n="nav_matches" class="text-[10px] font-bold font-headline">MATCHES</span></button>
+    </nav>
+    
+    <div id="matchOverlay">
+        <h1 data-i18n="match_overlay_title" class="font-headline font-black text-6xl mb-4">IT'S A<br>MATCH!</h1>
+        <p data-i18n="match_overlay_desc" class="font-body font-bold text-white mb-8">Kalian saling menyukai.</p>
+        <button id="closeMatchBtn" data-i18n="btn_keep_swiping" class="bg-primary-container text-primary border-4 border-primary py-3 px-8 font-headline font-black text-2xl uppercase hover:bg-white">KEEP SWIPING</button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); tg.ready(); tg.BackButton.hide();
+
+        let i18n = {};
+        const currentLang = ['en', 'id'].includes(tg.initDataUnsafe?.user?.language_code) ? tg.initDataUnsafe.user.language_code : 'en';
+
+        async function loadTranslations() {
+            try {
+                const res = await fetch(`locales/${currentLang}.json`);
+                i18n = await res.json();
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    if(i18n[el.getAttribute('data-i18n')]) el.innerHTML = i18n[el.getAttribute('data-i18n')];
+                });
+                loadProfiles(); // Load feed setelah bahasa siap
+            } catch (err) { loadProfiles(); }
+        }
+
+        function goTo(page) { window.location.href = page + window.location.search; }
+
+        const API_BASE = "https://bauhaus-match-bot.botgampang123.workers.dev";
+        const tgId = tg.initDataUnsafe?.user?.id;
+        let profiles = [];
+        const cardStack = document.getElementById('cardStack');
+
+        async function loadProfiles() {
+            try {
+                cardStack.innerHTML = `<div class="font-headline font-bold text-center mt-20 text-2xl animate-pulse">SEARCHING...</div>`;
+                const res = await fetch(`${API_BASE}/api/discovery?tg_id=${tgId}`);
+                const data = await res.json();
+                if(data.success) { profiles = data.profiles; renderCards(); }
+            } catch (err) {}
+        }
+
+        function renderCards() {
+            cardStack.innerHTML = '';
+            if (profiles.length === 0) {
+                cardStack.innerHTML = `<div class="p-8 text-center"><h2 class="font-headline font-black text-3xl">${i18n['radar_empty_title'] || 'RADAR KOSONG'}</h2><p class="font-bold mt-2">${i18n['radar_empty_desc'] || 'Tidak ada profil baru.'}</p></div>`;
+                return;
+            }
+
+            profiles.slice().reverse().forEach((p, i) => {
+                const html = `
+                    <div class="tinder-card" id="card-${p.telegram_id}" style="z-index: ${i}; transform: scale(${1 - ((profiles.length - 1 - i) * 0.05)}) translateY(${(profiles.length - 1 - i) * -15}px);">
+                        <div class="badge badge-like">LIKE</div><div class="badge badge-nope">PASS</div>
+                        <img src="${p.photo_url}" alt="Photo">
+                        <div class="p-4 bg-surface flex-1">
+                            <h2 class="font-headline font-black text-3xl uppercase tracking-tighter">${p.name}</h2>
+                            <p class="font-bold text-sm mb-2"><span class="material-symbols-outlined text-sm align-middle">location_on</span> ${p.location_city || 'Unknown'}</p>
+                            <p class="font-body text-sm line-clamp-2">${p.bio || ''}</p>
+                        </div>
+                    </div>`;
+                cardStack.insertAdjacentHTML('beforeend', html);
+            });
+            setupSwipeDrag();
+        }
+
+        async function swipe(action) {
+            if (profiles.length === 0) return;
+            const targetProfile = profiles[0];
+            const card = document.getElementById(`card-${targetProfile.telegram_id}`);
+            
+            card.style.transform = `translate(${action === 'LIKE' ? window.innerWidth : -window.innerWidth}px, -100px) rotate(${action === 'LIKE' ? 30 : -30}deg)`;
+            card.style.opacity = '0';
+            
+            action === 'LIKE' ? tg.HapticFeedback.notificationOccurred('success') : tg.HapticFeedback.impactOccurred('light');
+
+            profiles.shift();
+            setTimeout(() => { card.remove(); renderCards(); }, 300);
+
+            try {
+                const res = await fetch(`${API_BASE}/api/swipe`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ liker_id: tgId, liked_id: targetProfile.telegram_id, action: action }) });
+                if ((await res.json()).isMatch) {
+                    tg.HapticFeedback.notificationOccurred('warning');
+                    document.getElementById('matchOverlay').classList.add('active');
+                }
+            } catch (err) {}
+        }
+
+        document.getElementById('btnLike').addEventListener('click', () => swipe('LIKE'));
+        document.getElementById('btnPass').addEventListener('click', () => swipe('PASS'));
+        document.getElementById('closeMatchBtn').addEventListener('click', () => document.getElementById('matchOverlay').classList.remove('active'));
+
+        function setupSwipeDrag() {
+            if (profiles.length === 0) return;
+            const topCard = document.getElementById(`card-${profiles[0].telegram_id}`);
+            const badgeLike = topCard.querySelector('.badge-like'), badgeNope = topCard.querySelector('.badge-nope');
+            let isDragging = false, startX = 0, currentX = 0;
+
+            topCard.addEventListener('touchstart', e => { isDragging = true; startX = e.touches[0].clientX; topCard.style.transition = 'none'; });
+            topCard.addEventListener('touchmove', e => {
+                if (!isDragging) return; currentX = e.touches[0].clientX - startX;
+                topCard.style.transform = `translate(${currentX}px, 0) rotate(${currentX * 0.05}deg)`;
+                if (currentX > 50) { badgeLike.style.opacity = Math.min(currentX/100, 1); badgeNope.style.opacity = 0; } 
+                else if (currentX < -50) { badgeNope.style.opacity = Math.min(Math.abs(currentX)/100, 1); badgeLike.style.opacity = 0; }
+            });
+            topCard.addEventListener('touchend', () => {
+                if (!isDragging) return; isDragging = false;
+                topCard.style.transition = 'transform 0.3s, opacity 0.3s';
+                badgeLike.style.opacity = 0; badgeNope.style.opacity = 0;
+                if (currentX > window.innerWidth / 3) swipe('LIKE');
+                else if (currentX < -window.innerWidth / 3) swipe('PASS');
+                else topCard.style.transform = '';
+            });
+        }
+
+        loadTranslations();
+    </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+name = "bauhaus-match-bot"
+main = "src/index.ts"
+compatibility_date = "2024-03-20"
+
+# Konfigurasi Database D1
+[[d1_databases]]
+binding = "DB"
+database_name = "bauhaus_match_db"
+database_id = "fbd25524-d30d-499e-ab08-29c0b3118728" # Anda akan dapatkan ini setelah menjalankan perintah create D1

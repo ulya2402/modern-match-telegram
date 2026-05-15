@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Your Matches</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = { theme: { extend: { colors: { "primary": "#1a1a1a", "secondary": "#e63b2e", "tertiary": "#0055ff", "background": "#f5f0e8", "surface": "#f5f0e8", "primary-container": "#ffcc00" }, fontFamily: { "headline": ["Space Grotesk", "sans-serif"], "body": ["Inter", "sans-serif"] } } } }
+    </script>
+    <style>
+        body { background-color: theme('colors.background'); color: theme('colors.primary'); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; margin: 0; }
+        .list-container { flex: 1; overflow-y: auto; padding: 1rem; padding-bottom: 6rem; }
+        .match-card { border: 4px solid theme('colors.primary'); box-shadow: 4px 4px 0px 0px theme('colors.primary'); background: white; margin-bottom: 1rem; padding: 1rem; display: flex; align-items: center; gap: 1rem; }
+        .match-card img { width: 4rem; height: 4rem; object-fit: cover; border: 3px solid theme('colors.primary'); border-radius: 50%; }
+    </style>
+</head>
+<body class="font-body antialiased max-w-md mx-auto w-full relative border-x-4 border-primary">
+
+    <header class="p-4 border-b-4 border-primary bg-surface shrink-0">
+        <h1 data-i18n="matches_title" class="font-headline font-black text-3xl uppercase tracking-tighter">YOUR MATCHES</h1>
+    </header>
+
+    <div id="listContainer" class="list-container"></div>
+
+    <nav class="absolute bottom-0 w-full bg-surface border-t-4 border-primary p-3 flex justify-around items-center z-20">
+        <button onclick="goTo('feed.html')" class="flex flex-col items-center opacity-50 hover:opacity-100"><span class="material-symbols-outlined">style</span><span data-i18n="nav_feed" class="text-[10px] font-bold font-headline">FEED</span></button>
+        <button onclick="goTo('likes.html')" class="flex flex-col items-center opacity-50 hover:opacity-100"><span class="material-symbols-outlined">favorite</span><span data-i18n="nav_likes" class="text-[10px] font-bold font-headline">LIKES</span></button>
+        <button class="flex flex-col items-center text-primary"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">forum</span><span data-i18n="nav_matches" class="text-[10px] font-bold font-headline">MATCHES</span></button>
+    </nav>
+
+    <script>
+        const tg = window.Telegram.WebApp; tg.expand(); tg.ready();
+        
+        let i18n = {};
+        const currentLang = ['en', 'id'].includes(tg.initDataUnsafe?.user?.language_code) ? tg.initDataUnsafe.user.language_code : 'en';
+
+        async function loadTranslations() {
+            try {
+                const res = await fetch(`locales/${currentLang}.json`);
+                i18n = await res.json();
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    if(i18n[el.getAttribute('data-i18n')]) el.innerHTML = i18n[el.getAttribute('data-i18n')];
+                });
+                loadMatches();
+            } catch (err) { loadMatches(); }
+        }
+
+        function goTo(page) { window.location.href = page + window.location.search; }
+
+        const API_BASE = "https://bauhaus-match-bot.botgampang123.workers.dev";
+        const tgId = tg.initDataUnsafe?.user?.id;
+        const listContainer = document.getElementById('listContainer');
+
+        async function loadMatches() {
+            try {
+                listContainer.innerHTML = `<div class="text-center mt-10 font-bold">LOADING...</div>`;
+                const res = await fetch(`${API_BASE}/api/matches?tg_id=${tgId}`);
+                const data = await res.json();
+                
+                if (data.matches.length === 0) {
+                    listContainer.innerHTML = `<div class="text-center mt-10 p-6 border-4 border-primary bg-surface"><p class="font-headline font-black text-xl">${i18n['matches_empty'] || 'No matches yet.'}</p></div>`;
+                    return;
+                }
+
+                listContainer.innerHTML = '';
+                data.matches.forEach(p => {
+                    // Logic buka Telegram: Jika dia punya username, buka link t.me/username. Jika tidak, pakai link tg://user?id= (hanya bekerja jika satu grup)
+                    const chatLink = p.username ? `https://t.me/${p.username}` : `tg://user?id=${p.telegram_id}`;
+                    
+                    const card = document.createElement('div');
+                    card.className = "match-card";
+                    card.innerHTML = `
+                        <img src="${p.photo_url}" alt="Profile">
+                        <div class="flex-1">
+                            <h2 class="font-headline font-black text-xl uppercase">${p.name}</h2>
+                            <p class="font-bold text-xs mb-2">${p.location_city || ''}</p>
+                        </div>
+                        <button onclick="tg.openTelegramLink('${chatLink}')" class="bg-primary-container border-4 border-primary py-2 px-3 text-primary font-headline font-black hover:bg-primary hover:text-white transition-colors flex items-center justify-center">
+                            <span class="material-symbols-outlined">chat</span>
+                        </button>
+                    `;
+                    listContainer.appendChild(card);
+                });
+            } catch (err) {}
+        }
+
+        loadTranslations();
+    </script>
+</body>
+</html>

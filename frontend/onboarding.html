@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Get Started - Modern Match</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0..1,0" rel="stylesheet" />
+
+    <style>
+        /* ═══════════════════════════════════════════
+           DESIGN TOKENS — Auto Dark Mode Ready
+        ═══════════════════════════════════════════ */
+        :root {
+            --bg:          #FAFAF8;
+            --surface:     #FFFFFF;
+            --surface-glass: rgba(255, 255, 255, 0.7);
+            --primary:     #EA580C;
+            --peach-40:    rgba(254,215,170,0.40);
+            --text:        #111827;
+            --muted:       #6B7280;
+            --orb-1:       rgba(254, 215, 170, 0.5);
+            --orb-2:       rgba(234, 88, 12, 0.1);
+        }
+
+        html.dark {
+            --bg:          #1A1208;
+            --surface:     #231A0E;
+            --surface-glass: rgba(35, 26, 14, 0.7);
+            --primary:     #EA580C;
+            --peach-40:    rgba(120,53,15,0.40);
+            --text:        #F9FAFB;
+            --muted:       #A16207;
+            --orb-1:       rgba(234, 88, 12, 0.1);
+            --orb-2:       rgba(120, 53, 15, 0.3);
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            height: 100dvh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+            margin: 0; 
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* Ambient Background */
+        .ambient-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+        .aurora-orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.5; transform: translateZ(0); animation: floatOrb 25s infinite ease-in-out alternate; transition: background 0.3s ease; }
+        .orb-1 { width: 400px; height: 400px; background: var(--orb-1); top: -10%; left: -10%; }
+        .orb-2 { width: 300px; height: 300px; background: var(--orb-2); bottom: -5%; right: -5%; }
+        @keyframes floatOrb { 0% { transform: translate(0, 0); } 100% { transform: translate(50px, 50px); } }
+
+        /* Top Bar: Back Button & Progress Bar */
+        .top-bar { position: fixed; top: 0; left: 0; width: 100%; padding: 16px; display: flex; align-items: center; justify-content: space-between; z-index: 50; }
+        
+        .back-btn { width: 44px; height: 44px; border-radius: 50%; background: var(--surface-glass); backdrop-filter: blur(12px); border: 1px solid var(--peach-40); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: var(--text); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .back-btn:active { transform: scale(0.85); }
+        .back-btn.hidden { opacity: 0; pointer-events: none; transform: scale(0.5); }
+
+        .progress-container { flex: 1; max-width: 160px; height: 8px; background: rgba(254, 215, 170, 0.1); border-radius: 12px; margin: 0 16px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
+        .progress-bar { height: 100%; width: 33.33%; background: var(--primary); border-radius: 12px; transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1.2); box-shadow: 0 0 12px rgba(234, 88, 12, 0.6); }
+        .top-spacer { width: 44px; height: 44px; }
+
+        .step-view { display: none; width: 100%; height: 100%; flex-direction: column; padding: 24px; z-index: 10; animation: slideIn 0.4s ease-out forwards; }
+        .step-view.active { display: flex; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+        .glass-card { background: var(--surface-glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--peach-40); border-radius: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); padding: 32px; width: 100%; position: relative; transition: background 0.3s ease, border-color 0.3s ease; }
+        
+        .input-modern { width: 100%; background: var(--surface); border: 1px solid var(--peach-40); border-radius: 16px; padding: 16px; font-weight: 600; outline: none; transition: all 0.3s; color: var(--text); appearance: none;}
+        .input-modern::placeholder { color: var(--muted); font-weight: 500; opacity: 0.6; }
+        .input-modern:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.1); }
+        
+        .btn-primary { background: var(--primary); color: white; border-radius: 20px; padding: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; width: 100%; box-shadow: 0 10px 25px rgba(234, 88, 12, 0.3); transition: all 0.2s; border: none; }
+        .btn-primary:active { transform: scale(0.96); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .text-muted-custom { color: var(--muted); }
+    </style>
+</head>
+<body>
+    <div class="ambient-canvas">
+        <div class="aurora-orb orb-1"></div>
+        <div class="aurora-orb orb-2"></div>
+    </div>
+
+    <div class="top-bar">
+        <button id="backBtn" class="back-btn hidden" onclick="goBack()"><span class="material-symbols-outlined">arrow_back</span></button>
+        <div class="progress-container">
+            <div id="progressBar" class="progress-bar"></div>
+        </div>
+        <div class="top-spacer"></div>
+    </div>
+
+    <div id="step1" class="step-view active justify-center">
+        <div class="glass-card flex flex-col items-center text-center">
+            <h1 data-i18n="ob_title_1" class="text-3xl font-extrabold tracking-tight mb-2">Create Profile</h1>
+            <p data-i18n="ob_sub_1" class="text-muted-custom mb-8 font-medium">Let's start with your best photo</p>
+            
+            <div class="relative w-32 h-32 mb-8 cursor-pointer" onclick="document.getElementById('photoInput').click()">
+                <div id="photoPreview" class="w-full h-full rounded-full bg-orange-50/10 border-2 border-dashed border-orange-300 flex items-center justify-center overflow-hidden shadow-[0_8px_20px_rgba(26,18,8,0.1)] transition-transform active:scale-95">
+                    <span class="material-symbols-outlined text-4xl text-orange-400">add_a_photo</span>
+                </div>
+                <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
+                    <span class="material-symbols-outlined text-white">edit</span>
+                </div>
+                <input type="file" id="photoInput" accept="image/*" class="hidden">
+            </div>
+
+            <button onclick="goToStep(2)" class="btn-primary"><span data-i18n="ob_btn_continue">Continue</span></button>
+        </div>
+    </div>
+
+    <div id="step2" class="step-view justify-center">
+        <div class="glass-card">
+            <h2 data-i18n="ob_title_2" class="text-2xl font-bold mb-6 text-center">About You</h2>
+            <div class="space-y-4 mb-8">
+                <div>
+                    <label data-i18n="ob_label_name" class="block text-xs font-bold text-muted-custom uppercase tracking-wider mb-1 px-1">First Name</label>
+                    <input type="text" id="name" placeholder="E.g. Reza" class="input-modern">
+                </div>
+                <div>
+                    <label data-i18n="ob_label_city" class="block text-xs font-bold text-muted-custom uppercase tracking-wider mb-1 px-1">Base Camp (City)</label>
+                    <input type="text" id="city" placeholder="E.g. Jakarta" class="input-modern">
+                </div>
+            </div>
+            <button onclick="goToStep(3)" class="btn-primary"><span data-i18n="ob_btn_next">Next Step</span></button>
+        </div>
+    </div>
+
+    <div id="step3" class="step-view justify-center">
+        <div class="glass-card">
+            <h2 data-i18n="ob_title_3" class="text-2xl font-bold mb-6 text-center">Preferences</h2>
+            <div class="space-y-4 mb-8">
+                <select id="gender" class="input-modern">
+                    <option value="" disabled selected data-i18n="ob_opt_gender">I am a...</option>
+                    <option value="MALE" data-i18n="ob_opt_man">Man</option>
+                    <option value="FEMALE" data-i18n="ob_opt_woman">Woman</option>
+                </select>
+                <select id="preference" class="input-modern">
+                    <option value="" disabled selected data-i18n="ob_opt_pref">Looking for...</option>
+                    <option value="MALE" data-i18n="ob_opt_man">Men</option>
+                    <option value="FEMALE" data-i18n="ob_opt_woman">Women</option>
+                    <option value="EVERYONE" data-i18n="ob_opt_everyone">Everyone</option>
+                </select>
+                <textarea id="bio" placeholder="Write a short bio..." class="input-modern h-24 resize-none leading-relaxed"></textarea>
+            </div>
+            <button onclick="finishOnboarding()" id="finishBtn" class="btn-primary"><span data-i18n="ob_btn_start">Start Matching</span></button>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        // ─── LOGIKA AUTO DARK MODE ───
+        function applyTelegramTheme() {
+            if (tg.colorScheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                tg.setBackgroundColor('#1A1208'); 
+                tg.setHeaderColor('#1A1208');
+            } else {
+                document.documentElement.classList.remove('dark');
+                tg.setBackgroundColor('#FAFAF8'); 
+                tg.setHeaderColor('#FAFAF8');
+            }
+        }
+        applyTelegramTheme();
+        tg.onEvent('themeChanged', applyTelegramTheme);
+        
+        const user = tg.initDataUnsafe?.user;
+        const tgId = user?.id || 123;
+        
+        // ============================
+        // SISTEM TRANSLASI (i18n)
+        // ============================
+        let i18n = {};
+        const currentLang = ['en', 'id'].includes(user?.language_code) ? user.language_code : 'en';
+
+        async function loadTranslations() {
+            try {
+                const res = await fetch(`locales/${currentLang}.json`);
+                i18n = await res.json();
+                applyTranslations();
+            } catch (err) { console.error("Translation failed to load"); }
+        }
+
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                if(i18n[el.getAttribute('data-i18n')]) {
+                    el.innerHTML = i18n[el.getAttribute('data-i18n')];
+                }
+            });
+            // Update placeholders if language is Indonesian
+            if (currentLang === 'id') {
+                document.getElementById('name').placeholder = "Cth. Reza";
+                document.getElementById('city').placeholder = "Cth. Jakarta";
+                document.getElementById('bio').placeholder = "Tulis bio singkat untuk menarik perhatian...";
+            }
+        }
+        
+        // ============================
+        // LOGIKA FOTO & AUTO-FILL
+        // ============================
+        let photoBase64 = user?.photo_url || ""; 
+        let currentStep = 1;
+
+        window.onload = () => {
+            loadTranslations();
+            if (photoBase64) {
+                document.getElementById('photoPreview').innerHTML = `<img src="${photoBase64}" class="w-full h-full object-cover">`;
+                document.getElementById('photoPreview').classList.remove('border-dashed', 'border-2');
+            }
+            if (user?.first_name) {
+                document.getElementById('name').value = user.first_name;
+            }
+        };
+
+        // ============================
+        // NAVIGASI & VALIDASI
+        // ============================
+        function goToStep(nextStepIndex) {
+            // Validasi sebelum pindah ke Step 2
+            if (currentStep === 1 && nextStepIndex === 2) {
+                if (!photoBase64) {
+                    tg.HapticFeedback.notificationOccurred('error');
+                    tg.showAlert(i18n['ob_err_photo'] || "Oops! Mohon unggah foto profil Anda terlebih dahulu.");
+                    return;
+                }
+            } 
+            // Validasi sebelum pindah ke Step 3
+            else if (currentStep === 2 && nextStepIndex === 3) {
+                const nameVal = document.getElementById('name').value.trim();
+                const cityVal = document.getElementById('city').value.trim();
+                if (!nameVal || !cityVal) {
+                    tg.HapticFeedback.notificationOccurred('error');
+                    tg.showAlert(i18n['ob_err_name'] || "Nama dan Base Camp wajib diisi, ya!");
+                    return;
+                }
+            }
+
+            tg.HapticFeedback.impactOccurred('medium');
+            updateUI(nextStepIndex);
+        }
+
+        function goBack() {
+            if (currentStep > 1) {
+                tg.HapticFeedback.impactOccurred('light');
+                updateUI(currentStep - 1);
+            }
+        }
+
+        function updateUI(stepIndex) {
+            currentStep = stepIndex;
+            
+            document.querySelectorAll('.step-view').forEach(v => v.classList.remove('active'));
+            document.getElementById(`step${stepIndex}`).classList.add('active');
+            
+            const progress = (stepIndex / 3) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+
+            const backBtn = document.getElementById('backBtn');
+            if (stepIndex === 1) backBtn.classList.add('hidden');
+            else backBtn.classList.remove('hidden');
+        }
+
+        // ============================
+        // KOMPRESI FOTO
+        // ============================
+        document.getElementById('photoInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 640;
+                    let width = img.width, height = img.height;
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    canvas.width = width; canvas.height = height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                    photoBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    const preview = document.getElementById('photoPreview');
+                    preview.innerHTML = `<img src="${photoBase64}" class="w-full h-full object-cover">`;
+                    preview.classList.remove('border-dashed', 'border-2');
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
+        });
+
+        // ============================
+        // SIMPAN DATA (DENGAN VALIDASI ERROR)
+        // ============================
+        async function finishOnboarding() {
+            const genderVal = document.getElementById('gender').value;
+            const prefVal = document.getElementById('preference').value;
+            const bioVal = document.getElementById('bio').value.trim();
+
+            if (!genderVal || !prefVal || !bioVal) {
+                tg.HapticFeedback.notificationOccurred('error');
+                tg.showAlert("Mohon lengkapi pilihan Gender, Preferensi, dan Bio Anda!");
+                return;
+            }
+
+            tg.HapticFeedback.impactOccurred('medium');
+            const btn = document.getElementById('finishBtn');
+            btn.innerHTML = "Saving..."; btn.disabled = true;
+
+            const payload = {
+                telegram_id: tgId,
+                username: user?.username || "",
+                name: document.getElementById('name').value.trim(),
+                gender: genderVal,
+                location: document.getElementById('city').value.trim(),
+                preference: prefVal,
+                bio: bioVal,
+                photo_url: photoBase64
+            };
+
+            try {
+                // TODO: Pastikan URL Worker Anda Benar
+                const response = await fetch(`https://bauhaus-match-bot.botgampang123.workers.dev/api/onboarding`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.error || "Gagal menyimpan ke database.");
+                }
+
+                tg.HapticFeedback.notificationOccurred('success');
+                window.location.href = 'app.html';
+            } catch (err) { 
+                console.error("Onboarding Error:", err);
+                tg.showAlert("Gagal menyimpan profil: " + err.message); 
+                btn.disabled = false; 
+                btn.innerHTML = i18n['ob_btn_start'] || "Start Matching"; 
+            }
+        }
+    </script>
+</body>
+</html>

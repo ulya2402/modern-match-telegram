@@ -1,0 +1,22 @@
+INSERT OR IGNORE INTO users (telegram_id, name, gender, location_city, preference, bio, photo_url, is_onboarding_complete) 
+VALUES 
+(201, 'Nadia', 'FEMALE', 'Jakarta', 'EVERYONE', 'Suka senja, kopi, dan obrolan deep talk. Let''s match!', 'https://i.pravatar.cc/400?img=20', 1),
+(202, 'Raka', 'MALE', 'Bandung', 'EVERYONE', 'Tech enthusiast yang hobi naik gunung kalau weekend.', 'https://i.pravatar.cc/400?img=15', 1),
+(203, 'Maya', 'FEMALE', 'Bali', 'EVERYONE', 'Digital nomad. Loving the island life, looking for a partner in crime.', 'https://i.pravatar.cc/400?img=19', 1),
+(204, 'Dimas', 'MALE', 'Surabaya', 'EVERYONE', 'Kerja mulu, butuh teman ngobrol biar gak stres.', 'https://i.pravatar.cc/400?img=11', 1),
+(205, 'Clara', 'FEMALE', 'Jakarta', 'EVERYONE', 'Fashion, art, and everything aesthetic. ✨', 'https://i.pravatar.cc/400?img=16', 1),
+(206, 'Kevin', 'MALE', 'Yogyakarta', 'EVERYONE', 'Musisi amatir. Kalau match, nanti aku nyanyiin lagu.', 'https://i.pravatar.cc/400?img=8', 1),
+(207, 'Bella', 'FEMALE', 'Semarang', 'EVERYONE', 'Pecinta matcha dan kucing. Kucingku lebih galak dari aku.', 'https://i.pravatar.cc/400?img=24', 1),
+(208, 'Aris', 'MALE', 'Malang', 'EVERYONE', 'Suka kulineran. Kasih tau tempat makan favoritmu!', 'https://i.pravatar.cc/400?img=33', 1),
+(209, 'Gisel', 'FEMALE', 'Bandung', 'EVERYONE', 'Introvert in the streets, ekstrovert in the sheets (if we click).', 'https://i.pravatar.cc/400?img=42', 1),
+(210, 'Jojo', 'MALE', 'Jakarta', 'EVERYONE', 'Anak gym yang kadang lupa cara istirahat.', 'https://i.pravatar.cc/400?img=53', 1),
+(211, 'Tara', 'FEMALE', 'Bali', 'EVERYONE', 'Salty hair, sandy toes. Yuk ke pantai bareng.', 'https://i.pravatar.cc/400?img=45', 1),
+(212, 'Rio', 'MALE', 'Medan', 'EVERYONE', 'Suka otomotif dan touring. Gas?', 'https://i.pravatar.cc/400?img=59', 1),
+(213, 'Sintia', 'FEMALE', 'Surabaya', 'EVERYONE', 'Bukan cewek aesthetic, cuma cewek yang suka makan banyak.', 'https://i.pravatar.cc/400?img=47', 1),
+(214, 'Gilang', 'MALE', 'Jakarta', 'EVERYONE', 'Creative director. Let''s create something beautiful.', 'https://i.pravatar.cc/400?img=60', 1),
+(215, 'Putri', 'FEMALE', 'Bogor', 'EVERYONE', 'Suka udara dingin, kopi hangat, dan obrolan panjang.', 'https://i.pravatar.cc/400?img=49', 1),
+(216, 'Adit', 'MALE', 'Bandung', 'EVERYONE', 'Gamer, tapi ngga toxic kok. Beneran.', 'https://i.pravatar.cc/400?img=68', 1),
+(217, 'Vania', 'FEMALE', 'Yogyakarta', 'EVERYONE', 'Seniman lokal. Mencari muse untuk karya selanjutnya.', 'https://i.pravatar.cc/400?img=44', 1),
+(218, 'Fajar', 'MALE', 'Semarang', 'EVERYONE', 'Simple guy. Kerja, ngopi, tidur.', 'https://i.pravatar.cc/400?img=61', 1),
+(219, 'Rina', 'FEMALE', 'Jakarta', 'EVERYONE', 'HRD yang butuh healing dari ngurusin manusia tiap hari.', 'https://i.pravatar.cc/400?img=38', 1),
+(220, 'Edo', 'MALE', 'Bali', 'EVERYONE', 'Surfer. Let the waves carry us.', 'https://i.pravatar.cc/400?img=51', 1);

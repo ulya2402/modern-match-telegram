@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Likes You</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = { theme: { extend: { colors: { "primary": "#1a1a1a", "secondary": "#e63b2e", "tertiary": "#0055ff", "background": "#f5f0e8", "surface": "#f5f0e8", "primary-container": "#ffcc00" }, fontFamily: { "headline": ["Space Grotesk", "sans-serif"], "body": ["Inter", "sans-serif"] } } } }
+    </script>
+    <style>
+        body { background-color: theme('colors.background'); color: theme('colors.primary'); height: 100dvh; overflow: hidden; display: flex; flex-direction: column; margin: 0; }
+        .list-container { flex: 1; overflow-y: auto; padding: 1rem; padding-bottom: 6rem; }
+        .like-card { border: 4px solid theme('colors.primary'); box-shadow: 4px 4px 0px 0px theme('colors.primary'); background: white; margin-bottom: 1rem; overflow: hidden; display: flex; flex-direction: column; }
+    </style>
+</head>
+<body class="font-body antialiased max-w-md mx-auto w-full relative border-x-4 border-primary">
+
+    <header class="p-4 border-b-4 border-primary bg-surface shrink-0">
+        <h1 data-i18n="likes_title" class="font-headline font-black text-3xl uppercase tracking-tighter">LIKES YOU</h1>
+    </header>
+
+    <div id="listContainer" class="list-container"></div>
+
+    <nav class="absolute bottom-0 w-full bg-surface border-t-4 border-primary p-3 flex justify-around items-center z-20">
+        <button onclick="goTo('feed.html')" class="flex flex-col items-center opacity-50 hover:opacity-100"><span class="material-symbols-outlined">style</span><span data-i18n="nav_feed" class="text-[10px] font-bold font-headline">FEED</span></button>
+        <button class="flex flex-col items-center text-primary"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span><span data-i18n="nav_likes" class="text-[10px] font-bold font-headline">LIKES</span></button>
+        <button onclick="goTo('matches.html')" class="flex flex-col items-center opacity-50 hover:opacity-100"><span class="material-symbols-outlined">forum</span><span data-i18n="nav_matches" class="text-[10px] font-bold font-headline">MATCHES</span></button>
+    </nav>
+
+    <script>
+        const tg = window.Telegram.WebApp; tg.expand(); tg.ready();
+        
+        let i18n = {};
+        const currentLang = ['en', 'id'].includes(tg.initDataUnsafe?.user?.language_code) ? tg.initDataUnsafe.user.language_code : 'en';
+
+        async function loadTranslations() {
+            try {
+                const res = await fetch(`locales/${currentLang}.json`);
+                i18n = await res.json();
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    if(i18n[el.getAttribute('data-i18n')]) el.innerHTML = i18n[el.getAttribute('data-i18n')];
+                });
+                loadLikes();
+            } catch (err) { loadLikes(); }
+        }
+
+        function goTo(page) { window.location.href = page + window.location.search; }
+
+        const API_BASE = "https://bauhaus-match-bot.botgampang123.workers.dev";
+        const tgId = tg.initDataUnsafe?.user?.id;
+        const listContainer = document.getElementById('listContainer');
+
+        async function loadLikes() {
+            try {
+                listContainer.innerHTML = `<div class="text-center mt-10 font-bold">LOADING...</div>`;
+                const res = await fetch(`${API_BASE}/api/likes?tg_id=${tgId}`);
+                const data = await res.json();
+                
+                if (data.likes.length === 0) {
+                    listContainer.innerHTML = `<div class="text-center mt-10 p-6 border-4 border-primary bg-surface"><p class="font-headline font-black text-xl">${i18n['likes_empty'] || 'No pending likes.'}</p></div>`;
+                    return;
+                }
+
+                listContainer.innerHTML = '';
+                data.likes.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = "like-card";
+                    card.id = `like-${p.telegram_id}`;
+                    card.innerHTML = `
+                        <img src="${p.photo_url}" class="w-full h-48 object-cover border-b-4 border-primary">
+                        <div class="p-3">
+                            <h2 class="font-headline font-black text-2xl uppercase">${p.name}</h2>
+                            <p class="font-bold text-xs mb-2">${p.location_city || ''}</p>
+                            <div class="flex gap-2 mt-3">
+                                <button onclick="actionLike(${p.telegram_id}, 'PASS')" class="flex-1 bg-surface border-4 border-primary py-2 text-secondary hover:bg-secondary hover:text-white font-bold transition-colors">PASS</button>
+                                <button onclick="actionLike(${p.telegram_id}, 'LIKE')" class="flex-1 bg-primary-container border-4 border-primary py-2 text-primary font-headline font-black hover:bg-primary hover:text-white transition-colors">${i18n['btn_match_back'] || 'MATCH'}</button>
+                            </div>
+                        </div>
+                    `;
+                    listContainer.appendChild(card);
+                });
+            } catch (err) {}
+        }
+
+        window.actionLike = async function(targetId, action) {
+            tg.HapticFeedback.impactOccurred('medium');
+            document.getElementById(`like-${targetId}`).remove(); // Hapus instan dari layar
+            try {
+                const res = await fetch(`${API_BASE}/api/swipe`, { 
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ liker_id: tgId, liked_id: targetId, action: action }) 
+                });
+                if ((await res.json()).isMatch) {
+                    tg.HapticFeedback.notificationOccurred('warning');
+                    tg.showAlert(i18n['match_overlay_title'] ? i18n['match_overlay_title'].replace('<br>', ' ') : "IT'S A MATCH!");
+                }
+            } catch (err) {}
+        }
+
+        loadTranslations();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Modern Match Premium</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,200,0..1,0" rel="stylesheet" />
+
+    <style>
+        /* ═══════════════════════════════════════════
+           DESIGN TOKENS — Auto Dark Mode Ready
+        ═══════════════════════════════════════════ */
+        :root {
+            /* Tema Light (Bawaan) */
+            --bg:          #FAFAF8;
+            --surface:     #FFFFFF;
+            --primary:     #EA580C;
+            --primary-lt:  rgba(234,88,12,0.08);
+            --peach:       #FED7AA;
+            --peach-20:    rgba(254,215,170,0.20);
+            --peach-40:    rgba(254,215,170,0.40);
+            --text:        #111827;
+            --muted:       #6B7280;
+            --inactive:    #9CA3AF;
+            --nav-h:       68px;
+            --radius-card: 22px;
+            --shadow-soft: 0 4px 20px rgba(234,88,12,0.08);
+            --shadow-float:0 8px 28px rgba(26,18,8,0.10);
+            --shadow-glow: 0 4px 20px rgba(234,88,12,0.30);
+        }
+
+        /* Tema Dark Mode Otomatis */
+        html.dark {
+            --bg:          #1A1208;
+            --surface:     #231A0E;
+            --primary:     #EA580C;
+            --primary-lt:  rgba(234,88,12,0.15);
+            --peach:       #78350F;
+            --peach-20:    rgba(120,53,15,0.40);
+            --peach-40:    rgba(120,53,15,0.80);
+            --text:        #F9FAFB;
+            --muted:       #A16207;
+            --inactive:    #6B7280;
+            --shadow-soft: 0 4px 20px rgba(0,0,0,0.5);
+            --shadow-float:0 8px 28px rgba(0,0,0,0.6);
+        }
+
+        /* ═══════════════════════════════════════════
+           RESET & BASE
+        ═══════════════════════════════════════════ */
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
+
+        html { 
+            height: 100%; 
+            overscroll-behavior: none; 
+            transition: background-color 0.3s ease; 
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: transparent;
+            color: var(--text);
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            max-width: 430px;
+            margin: 0 auto;
+            position: relative;
+            overscroll-behavior: none;
+        }
+
+        /* ═══════════════════════════════════════════
+           AESTHETIC AURORA BACKGROUND (Full Seamless)
+        ═══════════════════════════════════════════ */
+        .ambient-canvas {
+            position: fixed; 
+            inset: 0; 
+            z-index: -1; 
+            pointer-events: none;
+            background: var(--bg); 
+            transition: background 0.3s ease; 
+            overflow: hidden;
+        }
+
+        .aurora-orb {
+            position: absolute; 
+            border-radius: 50%; 
+            filter: blur(60px); 
+            opacity: 0.7; 
+            transform: translateZ(0); 
+            will-change: transform; 
+            animation: floatOrb 25s infinite ease-in-out alternate;
+        }
+
+        .orb-1 { 
+            width: 350px; 
+            height: 350px; 
+            background: rgba(254, 215, 170, 0.4); 
+            top: -10%; 
+            left: -20%; 
+            animation-duration: 22s; 
+        }
+
+        .orb-2 { 
+            width: 400px; 
+            height: 400px; 
+            background: rgba(234, 88, 12, 0.12); 
+            bottom: -15%; 
+            right: -20%; 
+            animation-duration: 28s; 
+            animation-delay: -5s; 
+        }
+
+        .orb-3 { 
+            width: 250px; 
+            height: 250px; 
+            background: rgba(250, 230, 200, 0.5); 
+            top: 40%; 
+            left: 30%; 
+            animation-duration: 35s; 
+            animation-delay: -10s; 
+        }
+
+        html.dark .orb-1 { background: rgba(234, 88, 12, 0.1); }
+        html.dark .orb-2 { background: rgba(120, 53, 15, 0.3); }
+        html.dark .orb-3 { background: rgba(161, 98, 7, 0.15); }
+
+        @keyframes floatOrb {
+            0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+            33%  { transform: translate(40px, -60px) scale(1.1) rotate(15deg); }
+            66%  { transform: translate(-30px, 30px) scale(0.9) rotate(-5deg); }
+            100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+        }
+
+        /* ═══════════════════════════════════════════
+           HEADER
+        ═══════════════════════════════════════════ */
+        header { 
+            position: relative; 
+            z-index: 40; 
+            flex-shrink: 0; 
+            padding: 20px 16px 10px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background: transparent; 
+            border: none; 
+        }
+
+        #headerTitle { 
+            font-weight: 800; 
+            font-size: 1.25rem; 
+            letter-spacing: -0.02em; 
+            color: var(--text); 
+            transition: opacity 0.18s ease, transform 0.18s ease; 
+        }
+
+        /* ═══════════════════════════════════════════
+           MAIN & VIEW SYSTEM
+        ═══════════════════════════════════════════ */
+        main { 
+            flex: 1; 
+            position: relative; 
+            overflow: hidden; 
+            z-index: 1; 
+            background: transparent; 
+        }
+
+        .view { 
+            position: absolute; 
+            inset: 0; 
+            display: flex; 
+            flex-direction: column; 
+            opacity: 0; 
+            pointer-events: none; 
+            transform: scale(0.97); 
+            transition: opacity 0.28s ease, transform 0.28s ease; 
+            will-change: opacity, transform; 
+            background: transparent; 
+        }
+
+        .view.active { 
+            opacity: 1; 
+            pointer-events: auto; 
+            transform: scale(1); 
+        }
+
+        .scroll-area { 
+            flex: 1; 
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch; 
+            overscroll-behavior: contain; 
+            padding: 12px 16px; 
+            padding-bottom: calc(var(--nav-h) + max(16px, env(safe-area-inset-bottom)) + 24px); 
+            scroll-behavior: smooth; 
+        }
+
+        .scroll-area::-webkit-scrollbar { display: none; }
+
+        /* ═══════════════════════════════════════════
+           BOTTOM NAV — Pure Glass
+        ═══════════════════════════════════════════ */
+        #navWrapper { 
+            position: absolute; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            z-index: 50; 
+            display: flex; 
+            justify-content: center; 
+            padding-bottom: max(16px, env(safe-area-inset-bottom)); 
+            pointer-events: none; 
+        }
+
+        nav {
+            pointer-events: auto; 
+            display: flex; 
+            align-items: center; 
+            gap: 4px; 
+            padding: 6px 10px;
+            background: rgba(250, 250, 248, 0.15); 
+            border: 1px solid var(--peach-40); 
+            border-radius: 999px; 
+            box-shadow: var(--shadow-float);
+            backdrop-filter: blur(24px) saturate(150%); 
+            -webkit-backdrop-filter: blur(24px) saturate(150%); 
+            transition: background 0.3s;
+        }
+
+        html.dark nav { 
+            background: rgba(26, 18, 8, 0.4); 
+            border: 1px solid rgba(120, 53, 15, 0.4); 
+        }
+        
+        .nav-btn { 
+            position: relative; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            width: 52px; 
+            height: 52px; 
+            border-radius: 999px; 
+            border: none; 
+            background: transparent; 
+            color: var(--inactive); 
+            cursor: pointer; 
+            transition: color 0.22s ease, background 0.22s ease; 
+        }
+
+        .nav-btn.active { 
+            color: var(--primary); 
+            background: var(--primary-lt); 
+        }
+
+        .nav-btn.active .material-symbols-outlined { 
+            font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24; 
+            transform: translateY(-1px); 
+        }
+
+        .nav-btn .material-symbols-outlined { 
+            font-size: 26px; 
+            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 24; 
+            display: inline-flex; 
+        }
+        
+        .press { 
+            cursor: pointer; 
+            transition: transform 0.1s ease; 
+        }
+
+        .press:active { 
+            transform: scale(0.91); 
+        }
+
+        /* ═══════════════════════════════════════════
+           FEED VIEW
+        ═══════════════════════════════════════════ */
+        #view-feed { 
+            padding: 0 14px; 
+            padding-bottom: calc(var(--nav-h) + max(16px, env(safe-area-inset-bottom)) + 10px); 
+        }
+
+        #cardStack { 
+            flex: 1; 
+            position: relative; 
+            perspective: 1000px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            touch-action: none; 
+        }
+
+        .tinder-card {
+            position: absolute; 
+            width: 86%; 
+            height: 85%; 
+            border-radius: var(--radius-card); 
+            overflow: hidden; 
+            background: var(--surface); 
+            border: 1px solid var(--peach-40); 
+            box-shadow: var(--shadow-soft); 
+            transform-origin: center 110%; 
+            will-change: transform, opacity; 
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.3s ease; 
+            display: flex; 
+            flex-direction: column; 
+            touch-action: none; 
+            user-select: none;
+        }
+
+        .tinder-card.top { transition: none; }
+        
+        .tinder-card.fly-out { 
+            transition: transform 0.36s cubic-bezier(0.55, 0, 0.55, 0.2), opacity 0.28s ease; 
+        }
+
+        .card-photo { 
+            width: 100%; 
+            height: 65%; 
+            flex-shrink: 0; 
+            object-fit: cover; 
+            background: var(--peach-20); 
+            display: block; 
+            border-bottom: 1px solid var(--peach-20); 
+            will-change: transform; 
+        }
+
+        .card-body { padding: 20px 20px; flex: 1; display: flex; flex-direction: column; justify-content: flex-start; }
+        .card-name { font-weight: 800; font-size: 1.5rem; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 4px; color: var(--text); }
+        .card-loc { font-weight: 600; font-size: 0.8rem; color: var(--muted); display: flex; align-items: center; gap: 4px; margin-bottom: 12px; }
+
+        .card-loc .material-symbols-outlined { 
+            font-size: 15px; 
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .card-bio { 
+            font-size: 0.85rem; 
+            color: var(--muted); 
+            line-height: 1.5; 
+            display: -webkit-box; 
+            -webkit-line-clamp: 3; 
+            -webkit-box-orient: vertical; 
+            overflow: hidden; 
+        }
+
+        .badge { 
+            position: absolute; 
+            top: 20px; 
+            z-index: 20; 
+            padding: 6px 16px; 
+            font-weight: 900; 
+            font-size: 1.2rem; 
+            letter-spacing: 0.08em; 
+            text-transform: uppercase; 
+            border-radius: 10px; 
+            opacity: 0; 
+            pointer-events: none; 
+            background: rgba(255,255,255,0.92); 
+            backdrop-filter: blur(8px); 
+            border: 3px solid; 
+        }
+
+        html.dark .badge { background: rgba(0,0,0,0.8); }
+
+        .badge-like { 
+            right: 20px; 
+            color: var(--primary); 
+            border-color: var(--primary); 
+            transform: rotate(12deg); 
+        }
+
+        .badge-pass { 
+            left: 20px; 
+            color: var(--text); 
+            border-color: var(--text); 
+            transform: rotate(-12deg); 
+        }
+
+        #swipeControls { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 20px; 
+            padding: 10px 0 0; 
+            flex-shrink: 0; 
+            transition: opacity 0.25s ease; 
+        }
+
+        .ctrl-btn { 
+            border: none; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 999px; 
+            background: rgba(255,255,255,0.7); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid var(--peach-40); 
+            box-shadow: var(--shadow-float); 
+            transition: transform 0.1s ease, background 0.18s ease; 
+        }
+
+        html.dark .ctrl-btn { 
+            background: rgba(35, 26, 14, 0.7); 
+        }
+
+        .ctrl-btn:active { transform: scale(0.85); }
+        .ctrl-pass { width: 52px; height: 52px; color: var(--text); }
+        .ctrl-like { width: 62px; height: 62px; color: var(--primary); }
+
+        .ctrl-pass .material-symbols-outlined { 
+            font-size: 26px; 
+        }
+
+        .ctrl-like .material-symbols-outlined { 
+            font-size: 32px; 
+            font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24; 
+        }
+
+        .empty-state { 
+            position: absolute; 
+            inset: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 12px; 
+            text-align: center; 
+            padding: 32px; 
+            opacity: 0; 
+            animation: fadeIn 0.4s ease 0.1s forwards; 
+        }
+
+        .empty-icon { 
+            width: 72px; 
+            height: 72px; 
+            border-radius: 50%; 
+            background: var(--peach-20); 
+            border: 1px solid var(--peach-40); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin-bottom: 8px; 
+            backdrop-filter: blur(10px); 
+        }
+
+        .empty-icon .material-symbols-outlined { 
+            font-size: 34px; 
+            color: var(--primary); 
+        }
+
+        .empty-title { font-weight: 800; font-size: 1.3rem; }
+        .empty-sub   { font-weight: 500; font-size: 0.85rem; color: var(--muted); }
+
+        .skeleton { 
+            border-radius: 10px; 
+            background: linear-gradient(90deg, var(--peach-20) 25%, var(--surface) 50%, var(--peach-20) 75%); 
+            background-size: 800px 100%; 
+            animation: shimmer 1.4s infinite ease-in-out; 
+        }
+
+        @keyframes shimmer { 
+            0% { background-position: -400px 0; } 
+            100% { background-position: 400px 0; } 
+        }
+
+        /* ═══════════════════════════════════════════
+           LIST ITEMS (Likes / Matches)
+        ═══════════════════════════════════════════ */
+        .list-item { 
+            background: rgba(255,255,255,0.6); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid var(--peach-40); 
+            border-radius: 18px; 
+            padding: 14px; 
+            box-shadow: var(--shadow-soft); 
+            display: flex; 
+            align-items: center; 
+            gap: 14px; 
+            margin-bottom: 10px; 
+            opacity: 0; 
+            animation: slideUp 0.38s cubic-bezier(0.16,1,0.3,1) forwards; 
+        }
+
+        html.dark .list-item { 
+            background: rgba(35, 26, 14, 0.6); 
+        }
+
+        @keyframes slideUp { 
+            from { opacity: 0; transform: translateY(16px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        
+        .list-avatar { 
+            width: 52px; 
+            height: 52px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            flex-shrink: 0; 
+            border: 1px solid var(--peach-40); 
+        }
+        
+        .list-name { 
+            font-weight: 700; 
+            font-size: 0.95rem; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            color: var(--text); 
+        }
+
+        .list-sub { 
+            font-size: 0.72rem; 
+            font-weight: 500; 
+            color: var(--muted); 
+            display: flex; 
+            align-items: center; 
+            gap: 3px; 
+            margin-top: 3px; 
+        }
+
+        .btn-pass { 
+            padding: 6px 14px; 
+            border-radius: 999px; 
+            border: 1px solid var(--peach-40); 
+            font-size: 0.72rem; 
+            font-weight: 700; 
+            color: var(--text); 
+            background: transparent; 
+            cursor: pointer; 
+            transition: transform 0.1s; 
+        }
+
+        .btn-like { 
+            padding: 6px 14px; 
+            border-radius: 999px; 
+            border: none; 
+            font-size: 0.72rem; 
+            font-weight: 700; 
+            color: #fff; 
+            background: var(--primary); 
+            box-shadow: var(--shadow-glow); 
+            cursor: pointer; 
+            transition: transform 0.1s; 
+        }
+
+        .btn-chat { 
+            flex-shrink: 0; 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            border: 1px solid var(--peach-40); 
+            background: var(--primary-lt); 
+            color: var(--primary); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            transition: transform 0.1s; 
+            box-shadow: var(--shadow-soft); 
+        }
+
+        /* ═══════════════════════════════════════════
+           PROFILE VIEW
+        ═══════════════════════════════════════════ */
+        .profile-header { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 8px; 
+            margin-top: 10px; 
+            margin-bottom: 24px; 
+        }
+
+        .avatar-wrap { 
+            position: relative; 
+            width: 110px; 
+            height: 110px; 
+            cursor: pointer; 
+            border-radius: 50%; 
+        }
+        
+        .avatar-wrap img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            border-radius: 50%; 
+            border: 3px solid var(--surface); 
+            box-shadow: var(--shadow-float); 
+        }
+        
+        .avatar-overlay { 
+            position: absolute; 
+            inset: 0; 
+            border-radius: 50%; 
+            background: rgba(234,88,12,0.45); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            opacity: 0; 
+            transition: opacity 0.18s; 
+        }
+
+        .avatar-overlay .material-symbols-outlined { 
+            font-size: 28px; 
+            color: #fff; 
+        }
+
+        .avatar-wrap:active .avatar-overlay { opacity: 1; }
+
+        .settings-card { 
+            background: rgba(255,255,255,0.6); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid var(--peach-40); 
+            border-radius: 20px; 
+            box-shadow: var(--shadow-soft); 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            margin-bottom: 24px; 
+        }
+
+        html.dark .settings-card { background: rgba(35, 26, 14, 0.6); }
+
+        .settings-row { 
+            display: flex; 
+            align-items: center; 
+            padding: 16px 20px; 
+            border-bottom: 1px solid var(--peach-20); 
+            position: relative; 
+        }
+
+        .settings-row:last-child { border-bottom: none; }
+        
+        .settings-label { 
+            width: 110px; 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            color: var(--muted); 
+            flex-shrink: 0; 
+        }
+
+        .settings-input { 
+            flex: 1; 
+            border: none; 
+            background: transparent; 
+            font-family: inherit; 
+            font-size: 0.95rem; 
+            font-weight: 600; 
+            color: var(--text); 
+            outline: none; 
+            width: 100%; 
+            appearance: none; 
+            -webkit-appearance: none; 
+        }
+
+        .settings-bio { 
+            display: flex; 
+            flex-direction: column; 
+            padding: 16px 20px; 
+        }
+
+        .settings-bio label { 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            color: var(--muted); 
+            margin-bottom: 8px; 
+        }
+
+        .settings-bio textarea { 
+            width: 100%; 
+            border: none; 
+            background: transparent; 
+            font-family: inherit; 
+            font-size: 0.95rem; 
+            font-weight: 500; 
+            color: var(--text); 
+            outline: none; 
+            resize: none; 
+            line-height: 1.5; 
+            height: 80px; 
+        }
+
+        .btn-save { 
+            width: 100%; 
+            background: var(--primary); 
+            color: #fff; 
+            border: none; 
+            border-radius: 18px; 
+            padding: 18px; 
+            font-family: inherit; 
+            font-size: 0.95rem; 
+            font-weight: 800; 
+            letter-spacing: 0.02em; 
+            box-shadow: var(--shadow-glow); 
+            cursor: pointer; 
+            transition: transform 0.1s, background 0.18s; 
+        }
+
+        .btn-save:active  { transform: scale(0.97); }
+
+        /* MATCH OVERLAY */
+        #matchOverlay { 
+            display: none; 
+            position: absolute; 
+            inset: 0; 
+            z-index: 9999; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center; 
+            padding: 32px; 
+            background: rgba(250,250,248,0.95); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px); 
+        }
+
+        html.dark #matchOverlay { background: rgba(26, 18, 8, 0.95); }
+
+        #matchOverlay.show { 
+            display: flex; 
+            animation: popIn 0.45s forwards; 
+        }
+
+        @keyframes popIn { 
+            from { transform: scale(0.75); opacity: 0; } 
+            to { transform: scale(1); opacity: 1; } 
+        }
+
+        /* ── Floating Love Particles ── */
+        .match-particle {
+            position: absolute;
+            bottom: 30%;
+            left: 50%;
+            color: var(--primary);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+            animation: floatUp 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            font-variation-settings: 'FILL' 1, 'wght' 300;
+        }
+        @keyframes floatUp {
+            0% { transform: translate(-50%, 0) scale(0.5) rotate(0deg); opacity: 0; }
+            15% { opacity: 1; }
+            100% { transform: translate(calc(-50% + var(--tx)), -300px) scale(1.5) rotate(var(--rot)); opacity: 0; }
+        }
+        
+        /* ── Utilities ── */
+        .material-symbols-outlined { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            vertical-align: middle; 
+        }
+
+        @keyframes fadeIn { 
+            from { opacity: 0; } 
+            to { opacity: 1; } 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-canvas">
+        <div class="aurora-orb orb-1"></div>
+        <div class="aurora-orb orb-2"></div>
+        <div class="aurora-orb orb-3"></div>
+    </div>
+
+    <header>
+        <h1 id="headerTitle">Discover</h1>
+    </header>
+
+    <main>
+        <div id="view-feed" class="view">
+            <div id="cardStack"></div>
+            <div id="swipeControls">
+                <button class="ctrl-btn ctrl-pass press" onclick="doSwipe('PASS')"><span class="material-symbols-outlined">close</span></button>
+                <button class="ctrl-btn ctrl-like press" onclick="doSwipe('LIKE')"><span class="material-symbols-outlined">favorite</span></button>
+            </div>
+        </div>
+
+        <div id="view-likes" class="view">
+            <div id="listLikes" class="scroll-area"></div>
+        </div>
+
+        <div id="view-matches" class="view">
+            <div id="listMatches" class="scroll-area"></div>
+        </div>
+
+        <div id="view-profile" class="view">
+            <div class="scroll-area" style="display:flex; flex-direction:column;">
+                
+                <div class="profile-header">
+                    <div class="avatar-wrap press" onclick="document.getElementById('photoInput').click()">
+                        <img id="photoPreview" src="https://via.placeholder.com/150" alt="Profile photo">
+                        <div class="avatar-overlay"><span class="material-symbols-outlined">edit</span></div>
+                    </div>
+                    <p style="font-size:0.72rem; font-weight:600; color:var(--muted); margin-top:8px;">Tap to change photo</p>
+                    <input type="file" id="photoInput" accept="image/*" style="display:none;">
+                </div>
+
+                <div class="settings-card">
+                    <div class="settings-row">
+                        <label class="settings-label" for="editName">Name</label>
+                        <input id="editName" class="settings-input form-auto-scroll" type="text" placeholder="Your Name">
+                    </div>
+                    <div class="settings-row">
+                        <label class="settings-label" for="editCity">Location</label>
+                        <input id="editCity" class="settings-input form-auto-scroll" type="text" placeholder="e.g. Jakarta">
+                    </div>
+                    <div class="settings-row">
+                        <label class="settings-label" for="editPref">Looking For</label>
+                        <select id="editPref" class="settings-input">
+                            <option value="MALE">Men</option>
+                            <option value="FEMALE">Women</option>
+                            <option value="EVERYONE">Everyone</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <div class="settings-bio">
+                        <label for="editBio">Bio</label>
+                        <textarea id="editBio" class="form-auto-scroll" placeholder="Write something about yourself..."></textarea>
+                    </div>
+                </div>
+
+                <button class="btn-save press" id="btnSave" onclick="saveProfile()">Save Changes</button>
+            </div>
+        </div>
+    </main>
+
+    <div id="navWrapper">
+        <nav role="tablist">
+            <button class="nav-btn press" id="nav-feed" onclick="switchTab('feed')"><span class="material-symbols-outlined">local_fire_department</span></button>
+            <button class="nav-btn press" id="nav-likes" onclick="switchTab('likes')"><span class="material-symbols-outlined">favorite</span></button>
+            <button class="nav-btn press" id="nav-matches" onclick="switchTab('matches')"><span class="material-symbols-outlined">group</span></button>
+            <button class="nav-btn press" id="nav-profile" onclick="switchTab('profile')"><span class="material-symbols-outlined">person</span></button>
+        </nav>
+    </div>
+
+    <div id="matchOverlay" role="dialog" aria-modal="true">
+        <div style="width:120px;height:120px;border-radius:50%;background:var(--surface);border:1px solid var(--peach);display:flex;align-items:center;justify-content:center;margin-bottom:28px;">
+            <span class="material-symbols-outlined" style="font-size:58px;color:var(--primary);font-variation-settings:'FILL' 1;">favorite</span>
+        </div>
+        <h2 style="font-weight:900;font-size:2.4rem;letter-spacing:-0.04em;margin-bottom:8px;">It's a Match!</h2>
+        <p style="font-size:0.88rem;color:var(--muted);margin-bottom:40px;">You both liked each other.</p>
+        <button onclick="hideMatch()" style="padding:15px 44px;border:none;border-radius:999px;background:var(--primary);color:#fff;font-weight:800;cursor:pointer;">Keep Swiping</button>
+    </div>
+
+    <script>
+    /* ═══════════════════════════════════════════════════════
+       CONFIG & THEME AUTO DETECT
+    ═══════════════════════════════════════════════════════ */
+    // TODO: Pastikan API URL Anda sudah benar
+    const API = "https://bauhaus-match-bot.botgampang123.workers.dev";
+    
+    const tg  = window.Telegram?.WebApp || { 
+        expand(){}, 
+        ready(){}, 
+        BackButton:{hide(){}}, 
+        HapticFeedback:{selectionChanged(){}, impactOccurred(){}, notificationOccurred(){}}, 
+        initDataUnsafe:{}, 
+        colorScheme: 'light', 
+        setBackgroundColor(){}, 
+        setHeaderColor(){}, 
+        openTelegramLink(u){window.open(u)}, 
+        showAlert:alert, 
+        onEvent(){} 
+    };
+
+    tg.expand(); 
+    tg.ready(); 
+    tg.BackButton.hide();
+    
+    const tgId = tg.initDataUnsafe?.user?.id;
+
+    // FUNGSI DARK MODE OTOMATIS MENGIKUTI TEMA TELEGRAM
+    function applyTelegramTheme() {
+        if (tg.colorScheme === 'dark') {
+            document.documentElement.classList.add('dark');
+            tg.setBackgroundColor('#1A1208'); // Dark Espresso
+            tg.setHeaderColor('#1A1208');
+        } else {
+            document.documentElement.classList.remove('dark');
+            tg.setBackgroundColor('#FAFAF8'); // Warm White
+            tg.setHeaderColor('#FAFAF8');
+        }
+    }
+    
+    // Terapkan saat pertama kali dibuka
+    applyTelegramTheme();
+    // Dengarkan perubahan jika user mengganti tema Telegram secara real-time
+    tg.onEvent('themeChanged', applyTelegramTheme);
+
+    const profileScrollArea = document.querySelector('#view-profile .scroll-area');
+
+    // Smart Keyboard Scroll
+    document.querySelectorAll('.form-auto-scroll').forEach(input => {
+        // Saat ngetik: Tambahkan ruang 350px di bawah agar layar bisa didorong naik
+        input.addEventListener('focus', (e) => {
+            profileScrollArea.style.paddingBottom = '350px'; 
+            setTimeout(() => { 
+                e.target.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
+            }, 300);
+        });
+        
+        // Saat selesai ngetik: Kembalikan ukuran layar ke normal
+        input.addEventListener('blur', () => {
+            profileScrollArea.style.paddingBottom = 'calc(var(--nav-h) + max(16px, env(safe-area-inset-bottom)) + 24px)';
+        });
+    });
+
+    /* ═══════════════════════════════════════════════════════
+       TAB SWITCH
+    ═══════════════════════════════════════════════════════ */
+    const TITLES = { feed:'Discover', likes:'Liked You', matches:'Matches', profile:'Profile' };
+    let currentTab = '';
+
+    function switchTab(tab) {
+        if (currentTab === tab) return;
+        
+        tg.HapticFeedback.selectionChanged();
+        currentTab = tab;
+
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`nav-${tab}`).classList.add('active');
+
+        const titleEl = document.getElementById('headerTitle');
+        titleEl.style.opacity = '0';
+        titleEl.style.transform = 'scale(0.88)';
+        
+        setTimeout(() => {
+            titleEl.textContent = TITLES[tab];
+            titleEl.style.opacity = '1';
+            titleEl.style.transform = 'scale(1)';
+        }, 160);
+
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(`view-${tab}`).classList.add('active');
+
+        if (tab === 'feed')    initFeed();
+        if (tab === 'likes')   initLikes();
+        if (tab === 'matches') initMatches();
+        if (tab === 'profile') initProfile();
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       FEED LOGIC (Tumpukan Acak Stabilitas Tinggi)
+    ═══════════════════════════════════════════════════════ */
+    let profiles = [];
+    let feedLoaded = false;
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragCurrentX = 0;
+    let topCard = null;
+    let badgeLike = null;
+    let badgePass = null;
+    let rafId = null;
+
+    async function initFeed() {
+        if (feedLoaded && profiles.length > 0) { 
+            renderCards(); 
+            return; 
+        }
+        if (feedLoaded) return;
+        
+        // Anti-Double Fetch 
+        feedLoaded = true;
+
+        const stack = document.getElementById('cardStack');
+        stack.innerHTML = `
+            <div class="tinder-card top" style="display:flex;flex-direction:column; border:none; box-shadow:none; width:86%; height:85%;">
+                <div class="skeleton" style="width:100%;height:60%;"></div>
+                <div style="padding:18px 20px;flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;">
+                    <div class="skeleton" style="width:55%;height:22px;"></div>
+                    <div class="skeleton" style="width:32%;height:12px;"></div>
+                    <div class="skeleton" style="width:90%;height:10px;"></div>
+                </div>
+            </div>`;
+
+        try {
+            const res  = await fetch(`${API}/api/discovery?tg_id=${tgId}`);
+            const data = await res.json();
+            profiles   = data.success ? (data.profiles || []) : [];
+        } catch (_) { 
+            profiles = []; 
+        }
+
+        renderCards();
+    }
+
+    function renderCards() {
+        const stack = document.getElementById('cardStack');
+        const controls = document.getElementById('swipeControls');
+        
+        cleanupDrag(); 
+        stack.innerHTML = '';
+
+        if (profiles.length === 0) {
+            controls.style.opacity = '0'; 
+            controls.style.pointerEvents = 'none';
+            stack.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon"><span class="material-symbols-outlined">radar</span></div>
+                    <p class="empty-title">Radar Empty</p>
+                    <p class="empty-sub">No new profiles nearby.<br>Check back soon!</p>
+                </div>`;
+            return;
+        }
+
+        controls.style.opacity = '1'; 
+        controls.style.pointerEvents = 'auto';
+        
+        const visible = profiles.slice(0, Math.min(profiles.length, 3));
+
+        for (let i = visible.length - 1; i >= 0; i--) {
+            const p = visible[i];
+            const isTop = i === 0;
+            const depth = visible.length - 1 - i;
+            const seed = p.telegram_id || i;
+            
+            const randRot = isTop ? 0 : (seed % 14 - 7);
+            const transX  = isTop ? 0 : (seed % 20 - 10);
+            const transY  = isTop ? 0 : depth * -12;
+            const scaleY  = isTop ? 1 : 1 - depth * 0.05;
+
+            const card = document.createElement('article');
+            card.className = `tinder-card${isTop ? ' top' : ''}`;
+            card.id = `card-${p.telegram_id}`;
+            card.style.zIndex = visible.length - i;
+            card.style.transform = `translate(${transX}px, ${transY}px) scale(${scaleY}) rotate(${randRot}deg)`;
+
+            card.innerHTML = `
+                <div class="badge badge-like">LIKE</div>
+                <div class="badge badge-pass">PASS</div>
+                <img class="card-photo" src="${p.photo_url || ''}">
+                <div class="card-body">
+                    <h2 class="card-name">${p.name || ''}</h2>
+                    <p class="card-loc">
+                        <span class="material-symbols-outlined">location_on</span>
+                        ${p.location_city || 'Unknown'}
+                    </p>
+                    <p class="card-bio">${p.bio || ''}</p>
+                </div>`;
+                
+            stack.appendChild(card);
+
+            if (isTop) { 
+                topCard = card; 
+                badgeLike = card.querySelector('.badge-like'); 
+                badgePass = card.querySelector('.badge-pass'); 
+                setupDrag(card); 
+            }
+        }
+    }
+
+    function setupDrag(card) { 
+        card.addEventListener('touchstart', onTouchStart, { passive: true }); 
+        card.addEventListener('touchmove', onTouchMove, { passive: true }); 
+        card.addEventListener('touchend', onTouchEnd, { passive: true }); 
+    }
+
+    function cleanupDrag() { 
+        if (!topCard) return; 
+        topCard.removeEventListener('touchstart', onTouchStart); 
+        topCard.removeEventListener('touchmove', onTouchMove); 
+        topCard.removeEventListener('touchend', onTouchEnd); 
+        topCard = null; 
+        badgeLike = null; 
+        badgePass = null; 
+        if (rafId) { 
+            cancelAnimationFrame(rafId); 
+            rafId = null; 
+        } 
+    }
+
+    function onTouchStart(e) { 
+        isDragging = true; 
+        dragStartX = e.touches[0].clientX; 
+        dragCurrentX = 0; 
+        topCard.style.transition = 'none'; 
+        topCard.classList.remove('snap-back'); 
+    }
+
+    function onTouchMove(e) { 
+        if (!isDragging) return; 
+        dragCurrentX = e.touches[0].clientX - dragStartX; 
+        if (rafId) return; 
+        rafId = requestAnimationFrame(applyDrag); 
+    }
+
+    function applyDrag() {
+        rafId = null; 
+        if (!topCard) return;
+        
+        const dx = dragCurrentX;
+        const deg = dx * 0.048;
+        const dy = Math.abs(dx) * 0.04;
+        
+        topCard.style.transform = `translate(${dx}px, ${-dy}px) rotate(${deg}deg)`;
+        
+        const t = Math.min(Math.abs(dx) / (window.innerWidth * 0.25), 1);
+        if (dx > 20) { 
+            badgeLike.style.opacity = t; 
+            badgePass.style.opacity = 0; 
+        } else if (dx < -20) { 
+            badgePass.style.opacity = t; 
+            badgeLike.style.opacity = 0; 
+        } else { 
+            badgeLike.style.opacity = 0; 
+            badgePass.style.opacity = 0; 
+        }
+    }
+
+    function onTouchEnd() {
+        if (!isDragging) return; 
+        isDragging = false; 
+        
+        if (rafId) { 
+            cancelAnimationFrame(rafId); 
+            rafId = null; 
+        }
+        
+        const threshold = window.innerWidth * 0.32;
+        
+        if (dragCurrentX > threshold) {
+            doSwipe('LIKE');
+        } else if (dragCurrentX < -threshold) {
+            doSwipe('PASS');
+        } else { 
+            topCard.classList.add('snap-back'); 
+            topCard.style.transform = `translate(0px, 0px) scale(1) rotate(0deg)`; 
+            badgeLike.style.opacity = 0; 
+            badgePass.style.opacity = 0; 
+        }
+    }
+
+    window.doSwipe = async function(action) {
+        if (!profiles.length) return;
+        
+        const profile = profiles[0]; 
+        const card = document.getElementById(`card-${profile.telegram_id}`);
+        if (!card) return; 
+        
+        cleanupDrag();
+        
+        const flyX = (action === 'LIKE' ? 1 : -1) * (window.innerWidth + 80);
+        card.classList.add('fly-out'); 
+        card.style.transform = `translate(${flyX}px, -40px) rotate(${action === 'LIKE' ? 22 : -22}deg)`; 
+        card.style.opacity = '0';
+        
+        if (action === 'LIKE') {
+            tg.HapticFeedback.notificationOccurred('success');
+        } else {
+            tg.HapticFeedback.impactOccurred('light');
+        }
+        
+        profiles.shift();
+        
+        setTimeout(() => { 
+            card.remove(); 
+            renderCards(); 
+        }, 340);
+        
+        // Panggil API di background (fire and forget) untuk mencegah lag UI
+        fetch(`${API}/api/swipe`, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ 
+                liker_id: tgId, 
+                liked_id: profile.telegram_id, 
+                action: action 
+            }) 
+        })
+        .then(res => res.json())
+        .then(data => { 
+            if (data.isMatch) showMatch(); 
+        })
+        .catch(err => console.error(err));
+    };
+
+    /* ═══════════════════════════════════════════════════════
+       LIKES & MATCHES & PROFILE
+    ═══════════════════════════════════════════════════════ */
+    let likesLoaded = false;
+
+    async function initLikes() {
+        if (likesLoaded) return;
+        
+        const list = document.getElementById('listLikes'); 
+        list.innerHTML = skeletonList();
+        
+        try {
+            const res = await fetch(`${API}/api/likes?tg_id=${tgId}`); 
+            const data = await res.json(); 
+            const items = data.likes || [];
+            
+            if (!items.length) { 
+                list.innerHTML = emptyState('sentiment_neutral', 'No Likes Yet', "No one has liked you yet."); 
+                return; 
+            }
+            
+            list.innerHTML = items.map((p, i) => `
+                <div class="list-item" id="like-${p.telegram_id}" style="animation-delay:${i * 0.07}s">
+                    <img class="list-avatar" src="${p.photo_url || ''}">
+                    <div style="flex:1; overflow:hidden;">
+                        <p class="list-name">${p.name}</p>
+                        <div style="display:flex; gap:8px; margin-top:10px;">
+                            <button class="btn-pass" onclick="actLike(${p.telegram_id},'PASS')">Pass</button>
+                            <button class="btn-like" style="display:inline-flex; align-items:center; justify-content:center; gap:4px;" onclick="actLike(${p.telegram_id},'LIKE')">
+    Match <span class="material-symbols-outlined" style="font-size: 14px; font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            likesLoaded = true;
+        } catch (_) { 
+            list.innerHTML = emptyState('wifi_off', 'Connection Error', 'Could not load likes.'); 
+        }
+    }
+
+    window.actLike = async function(id, action) {
+        tg.HapticFeedback.impactOccurred('medium'); 
+        
+        const el = document.getElementById(`like-${id}`); 
+        if (!el) return;
+        
+        el.style.transition = 'opacity 0.25s ease, transform 0.25s ease'; 
+        el.style.opacity = '0'; 
+        el.style.transform = 'scale(0.9) translateY(8px)';
+        
+        setTimeout(() => el.remove(), 240);
+        
+        try {
+            await fetch(`${API}/api/swipe`, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ 
+                    liker_id: tgId, 
+                    liked_id: id, 
+                    action: action 
+                }) 
+            });
+            
+            if (action === 'LIKE') showMatch();
+        } catch (_) {}
+    };
+
+    let matchesLoaded = false;
+
+    async function initMatches() {
+        if (matchesLoaded) return;
+        
+        const list = document.getElementById('listMatches'); 
+        list.innerHTML = skeletonList();
+        
+        try {
+            const res = await fetch(`${API}/api/matches?tg_id=${tgId}`); 
+            const data = await res.json(); 
+            const items = data.matches || [];
+            
+            if (!items.length) { 
+                list.innerHTML = emptyState('forum', 'No Matches Yet', 'Keep swiping to find your match!'); 
+                return; 
+            }
+            
+            list.innerHTML = items.map((p, i) => `
+                <div class="list-item" style="animation-delay:${i * 0.07}s">
+                    <img class="list-avatar" src="${p.photo_url || ''}">
+                    <div style="flex:1; overflow:hidden;">
+                        <p class="list-name">${p.name}</p>
+                        <p style="font-size: 0.72rem; color: var(--muted); margin-top: 3px;">
+                            <span class="material-symbols-outlined" style="font-size: 12px;">location_on</span>
+                            ${p.location_city || 'Unknown'}
+                        </p>
+                    </div>
+                    <button class="btn-chat" onclick="openChat('${p.username}', ${p.telegram_id})">
+                        <span class="material-symbols-outlined">chat</span>
+                    </button>
+                </div>
+            `).join('');
+            
+            matchesLoaded = true;
+        } catch (_) { 
+            list.innerHTML = emptyState('wifi_off', 'Connection Error', 'Could not load matches.'); 
+        }
+    }
+
+    window.openChat = function(username, id) { 
+        tg.openTelegramLink(username ? `https://t.me/${username}` : `tg://user?id=${id}`); 
+    };
+
+    let profileLoaded = false; 
+    let photoBase64 = '';
+
+    async function initProfile() {
+        if (profileLoaded) return;
+        
+        const btn = document.getElementById('btnSave'); 
+        btn.textContent = 'Loading…'; 
+        btn.disabled = true;
+        
+        try {
+            const res = await fetch(`${API}/api/profile?tg_id=${tgId}`); 
+            const data = await res.json();
+            
+            if (data.success && data.user) {
+                const u = data.user;
+                document.getElementById('editName').value = u.name || ''; 
+                document.getElementById('editCity').value = u.location_city || ''; 
+                document.getElementById('editPref').value = u.preference || 'EVERYONE'; 
+                document.getElementById('editBio').value = u.bio || ''; 
+                document.getElementById('photoPreview').src = u.photo_url || 'https://via.placeholder.com/150';
+                photoBase64 = u.photo_url || ''; 
+                profileLoaded = true;
+            }
+        } catch (_) {}
+        
+        btn.textContent = 'Save Changes'; 
+        btn.disabled = false;
+    }
+
+    document.getElementById('photoInput').addEventListener('change', function(e) {
+        const file = e.target.files[0]; 
+        if (!file) return; 
+        
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas'); 
+                const MAX = 640; 
+                let w = img.width, h = img.height; 
+                
+                if (w > MAX) { 
+                    h = Math.round(h * MAX / w); 
+                    w = MAX; 
+                }
+                
+                canvas.width = w; 
+                canvas.height = h; 
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                
+                photoBase64 = canvas.toDataURL('image/jpeg', 0.78); 
+                document.getElementById('photoPreview').src = photoBase64; 
+                tg.HapticFeedback.selectionChanged();
+            }; 
+            img.src = ev.target.result;
+        }; 
+        reader.readAsDataURL(file);
+    });
+
+    window.saveProfile = async function() {
+        tg.HapticFeedback.impactOccurred('medium'); 
+        
+        const btn = document.getElementById('btnSave'); 
+        btn.textContent = 'Saving…'; 
+        btn.disabled = true;
+        
+        try {
+            await fetch(`${API}/api/profile`, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ 
+                    telegram_id: tgId, 
+                    name: document.getElementById('editName').value, 
+                    location: document.getElementById('editCity').value, 
+                    preference: document.getElementById('editPref').value, 
+                    bio: document.getElementById('editBio').value, 
+                    photo_url: photoBase64 
+                }) 
+            });
+            
+            tg.HapticFeedback.notificationOccurred('success'); 
+            tg.showAlert('Profile updated!');
+        } catch (_) { 
+            tg.showAlert('Error saving profile.'); 
+        }
+        
+        btn.textContent = 'Save Changes'; 
+        btn.disabled = false;
+    };
+
+    function showMatch() { 
+        tg.HapticFeedback.notificationOccurred('warning'); 
+        const overlay = document.getElementById('matchOverlay');
+        overlay.classList.add('show'); 
+
+        // Efek Semburan Partikel Love Aesthetic
+        for (let i = 0; i < 20; i++) {
+            setTimeout(() => {
+                const heart = document.createElement('span');
+                heart.className = 'material-symbols-outlined match-particle';
+                heart.textContent = 'favorite';
+                
+                // Kalkulasi pergerakan acak (menyebar ke kiri/kanan dan memutar)
+                const tx = (Math.random() - 0.5) * 250 + 'px'; 
+                const rot = (Math.random() - 0.5) * 120 + 'deg';
+                const size = (Math.random() * 20 + 16) + 'px';
+                
+                heart.style.setProperty('--tx', tx);
+                heart.style.setProperty('--rot', rot);
+                heart.style.fontSize = size;
+                
+                // Tambahkan sedikit variasi warna (Orange utama & Light Peach)
+                if (Math.random() > 0.5) heart.style.color = 'var(--peach)';
+                
+                overlay.appendChild(heart);
+                
+                // Hapus elemen setelah animasi selesai agar memori tidak penuh
+                setTimeout(() => heart.remove(), 2500);
+            }, i * 60); // Jeda berurutan (staggered) agar semburannya natural
+        }
+    }
+    
+    window.hideMatch = function() { 
+        document.getElementById('matchOverlay').classList.remove('show'); 
+    }
+
+    function skeletonList() { 
+        return Array(3).fill(0).map(() => `
+            <div class="list-item" style="animation:none; opacity:1;">
+                <div class="skeleton" style="width:52px;height:52px;border-radius:50%;flex-shrink:0;"></div>
+                <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+                    <div class="skeleton" style="width:45%;height:16px;"></div>
+                    <div class="skeleton" style="width:70%;height:12px;"></div>
+                </div>
+            </div>
+        `).join(''); 
+    }
+
+    function emptyState(icon, title, sub) { 
+        return `
+            <div style="text-align:center; margin-top:80px; display:flex; flex-direction:column; align-items:center; gap:12px; opacity:0; animation:fadeIn 0.4s ease 0.1s forwards;">
+                <div class="empty-icon"><span class="material-symbols-outlined">${icon}</span></div>
+                <p class="empty-title">${title}</p>
+                <p class="empty-sub">${sub}</p>
+            </div>
+        `; 
+    }
+
+    // Start App
+    switchTab('feed');
+    </script>
+</body>
+</html>
