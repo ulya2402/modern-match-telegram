@@ -311,7 +311,7 @@
             box-shadow: var(--shadow-soft); 
             transform-origin: center 110%; 
             will-change: transform, opacity; 
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.3s ease; 
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.3s ease; 
             display: flex; 
             flex-direction: column; 
             touch-action: none; 
@@ -321,7 +321,7 @@
         .tinder-card.top { transition: none; }
         
         .tinder-card.fly-out { 
-            transition: transform 0.36s cubic-bezier(0.55, 0, 0.55, 0.2), opacity 0.28s ease; 
+            transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease; 
         }
 
         .card-photo { 
@@ -337,10 +337,21 @@
 
         .card-body { padding: 20px 20px; flex: 1; display: flex; flex-direction: column; justify-content: flex-start; }
         .card-name { font-weight: 800; font-size: 1.5rem; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 4px; color: var(--text); }
-        .card-loc { font-weight: 600; font-size: 0.8rem; color: var(--muted); display: flex; align-items: center; gap: 4px; margin-bottom: 12px; }
+        
+        .card-loc { 
+            font-weight: 600; 
+            font-size: 0.85rem; 
+            color: var(--muted); 
+            display: flex; 
+            align-items: center; 
+            gap: 4px; 
+            margin-bottom: 12px; 
+            line-height: 1; 
+        }
 
         .card-loc .material-symbols-outlined { 
-            font-size: 15px; 
+            font-size: 16px; 
+            transform: translateY(-1px);
             font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
         }
 
@@ -350,6 +361,7 @@
             line-height: 1.5; 
             display: -webkit-box; 
             -webkit-line-clamp: 3; 
+            line-clamp: 3; 
             -webkit-box-orient: vertical; 
             overflow: hidden; 
         }
@@ -768,9 +780,314 @@
             from { opacity: 0; } 
             to { opacity: 1; } 
         }
+
+        @keyframes radarSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .icon-spin {
+            animation: radarSpin 3s linear infinite;
+            display: inline-block;
+        }
+
+        .keyboard-active {
+            padding-bottom: 350px !important;
+        }
+
+        #heartphoriaLoader {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s cubic-bezier(0.85, 0, 0.15, 1), transform 0.8s cubic-bezier(0.85, 0, 0.15, 1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        #heartphoriaLoader.hide {
+            opacity: 0;
+            transform: scale(1.05);
+            pointer-events: none;
+        }
+
+        .loader-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .loader-icon {
+            font-size: 72px;
+            color: var(--primary);
+            font-variation-settings: 'FILL' 1;
+            animation: heartBeat 1.2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+            filter: drop-shadow(0 4px 20px rgba(234,88,12,0.4));
+        }
+
+        .loader-text {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 800;
+            font-size: 2.2rem;
+            letter-spacing: -0.04em;
+            background: linear-gradient(135deg, var(--primary), var(--peach));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textShine 2.5s infinite linear;
+            background-size: 200% auto;
+        }
+
+        @keyframes heartBeat {
+            0% { transform: scale(0.95); }
+            5% { transform: scale(1.1); }
+            39% { transform: scale(0.85); }
+            45% { transform: scale(1); }
+            60% { transform: scale(0.95); }
+            100% { transform: scale(0.95); }
+        }
+
+        @keyframes textShine {
+            to { background-position: 200% center; }
+        }
+
+        #navWrapper {
+            transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
+        }
+
+        .nav-hidden {
+            transform: translateY(100px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .minimal-form-group {
+            background: var(--surface);
+            border: 1px solid var(--peach-40);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 24px;
+        }
+
+        .minimal-row {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--peach-20);
+        }
+
+        .minimal-row:last-child {
+            border-bottom: none;
+        }
+
+        .minimal-label {
+            width: 100px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--muted);
+            flex-shrink: 0;
+        }
+
+        .minimal-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+            outline: none;
+            width: 100%;
+        }
+
+        .minimal-textarea {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text);
+            outline: none;
+            resize: none;
+            height: 80px;
+            padding: 14px 18px;
+            line-height: 1.5;
+        }
+
+    header {
+            position: relative;
+            z-index: 40;
+            flex-shrink: 0;
+            padding: 20px 16px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+        }
+
+        .header-save-btn {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 6px 16px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            box-shadow: var(--shadow-glow);
+            transition: transform 0.1s ease, opacity 0.2s ease;
+        }
+
+        .header-save-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        #navWrapper {
+            transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
+        }
+
+        .nav-hidden {
+            transform: translateY(100px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+    .safe-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 32px;
+            width: 100%;
+        }
+
+        .safe-input-wrap {
+            background: var(--surface);
+            border: 1px solid var(--peach-40);
+            border-radius: 16px;
+            padding: 14px 18px;
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .safe-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            letter-spacing: 0.05em;
+        }
+
+        .safe-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 1rem;
+            font-weight: 600;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .safe-textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 1rem;
+            font-weight: 500;
+            outline: none;
+            font-family: inherit;
+            resize: none;
+            height: 80px;
+            line-height: 1.5;
+        }
+
+    .safe-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 32px;
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        .safe-input-wrap {
+            background: var(--surface);
+            border: 1px solid var(--peach-40);
+            border-radius: 16px;
+            padding: 14px 18px;
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .safe-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            letter-spacing: 0.05em;
+        }
+
+        .safe-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 1rem;
+            font-weight: 600;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .safe-textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 1rem;
+            font-weight: 500;
+            outline: none;
+            font-family: inherit;
+            resize: none;
+            height: 80px;
+            line-height: 1.5;
+        }
+
+        #navWrapper {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .nav-hidden {
+            transform: translateY(100px);
+            opacity: 0;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
+
+    <div id="heartphoriaLoader">
+        <div class="loader-content">
+            <span class="material-symbols-outlined loader-icon">favorite</span>
+            <h1 class="loader-text">Heartphoria</h1>
+        </div>
+    </div>
 
     <div class="ambient-canvas">
         <div class="aurora-orb orb-1"></div>
@@ -778,8 +1095,9 @@
         <div class="aurora-orb orb-3"></div>
     </div>
 
-    <header>
+   <header>
         <h1 id="headerTitle">Discover</h1>
+        <button id="headerSaveBtn" class="header-save-btn press" onclick="saveProfile()" style="display: none;">Save</button>
     </header>
 
     <main>
@@ -801,43 +1119,42 @@
 
         <div id="view-profile" class="view">
             <div class="scroll-area" style="display:flex; flex-direction:column;">
-                
-                <div class="profile-header">
+                <div class="profile-header" style="flex-shrink:0;">
                     <div class="avatar-wrap press" onclick="document.getElementById('photoInput').click()">
                         <img id="photoPreview" src="https://via.placeholder.com/150" alt="Profile photo">
                         <div class="avatar-overlay"><span class="material-symbols-outlined">edit</span></div>
                     </div>
-                    <p style="font-size:0.72rem; font-weight:600; color:var(--muted); margin-top:8px;">Tap to change photo</p>
+                    <p style="font-size:0.75rem; font-weight:700; color:var(--primary); margin-top:12px; text-transform:uppercase; letter-spacing:0.05em;">Change Photo</p>
                     <input type="file" id="photoInput" accept="image/*" style="display:none;">
                 </div>
-
-                <div class="settings-card">
-                    <div class="settings-row">
-                        <label class="settings-label" for="editName">Name</label>
-                        <input id="editName" class="settings-input form-auto-scroll" type="text" placeholder="Your Name">
+                
+                <div class="safe-input-group">
+                    <div class="safe-input-wrap">
+                        <label class="safe-label">Name</label>
+                        <input id="editName" class="safe-input" type="text" placeholder="Your Name">
                     </div>
-                    <div class="settings-row">
-                        <label class="settings-label" for="editCity">Location</label>
-                        <input id="editCity" class="settings-input form-auto-scroll" type="text" placeholder="e.g. Jakarta">
+                    <div class="safe-input-wrap">
+                        <label class="safe-label">City</label>
+                        <input id="editCity" class="safe-input" type="text" placeholder="e.g. Jakarta">
                     </div>
-                    <div class="settings-row">
-                        <label class="settings-label" for="editPref">Looking For</label>
-                        <select id="editPref" class="settings-input">
+                    <div class="safe-input-wrap">
+                        <label class="safe-label">Province</label>
+                        <input id="editProvince" class="safe-input" type="text" placeholder="e.g. DKI Jakarta">
+                    </div>
+                    <div class="safe-input-wrap">
+                        <label class="safe-label">Looking For</label>
+                        <select id="editPref" class="safe-input">
                             <option value="MALE">Men</option>
                             <option value="FEMALE">Women</option>
                             <option value="EVERYONE">Everyone</option>
                         </select>
                     </div>
-                </div>
-
-                <div class="settings-card">
-                    <div class="settings-bio">
-                        <label for="editBio">Bio</label>
-                        <textarea id="editBio" class="form-auto-scroll" placeholder="Write something about yourself..."></textarea>
+                    <div class="safe-input-wrap">
+                        <label class="safe-label">Bio</label>
+                        <textarea id="editBio" class="safe-textarea" placeholder="Write a short bio about yourself..."></textarea>
                     </div>
                 </div>
-
-                <button class="btn-save press" id="btnSave" onclick="saveProfile()">Save Changes</button>
+                <div style="height: 50px; flex-shrink:0;"></div>
             </div>
         </div>
     </main>
@@ -905,7 +1222,43 @@
     // Dengarkan perubahan jika user mengganti tema Telegram secara real-time
     tg.onEvent('themeChanged', applyTelegramTheme);
 
-    const profileScrollArea = document.querySelector('#view-profile .scroll-area');
+
+    const navWrapper = document.getElementById('navWrapper');
+    const initialWindowHeight = window.innerHeight;
+    
+    function initKeyboardHandler() {
+        const profileInputs = document.querySelectorAll('#view-profile input:not([type="file"]), #view-profile textarea, #view-profile select');
+        const profileScrollArea = document.querySelector('#view-profile .scroll-area');
+        
+        profileInputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                tg.expand();
+                if (navWrapper) navWrapper.classList.add('nav-hidden');
+                if (profileScrollArea) profileScrollArea.style.paddingBottom = '45vh';
+            });
+            
+            input.addEventListener('blur', () => {
+                if (navWrapper) navWrapper.classList.remove('nav-hidden');
+                if (profileScrollArea) profileScrollArea.style.paddingBottom = 'calc(var(--nav-h) + max(16px, env(safe-area-inset-bottom)) + 32px)';
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerHeight >= initialWindowHeight - 50) {
+                if (navWrapper) navWrapper.classList.remove('nav-hidden');
+                if (profileScrollArea) profileScrollArea.style.paddingBottom = 'calc(var(--nav-h) + max(16px, env(safe-area-inset-bottom)) + 32px)';
+            }
+        });
+    }
+    
+    setTimeout(initKeyboardHandler, 1000);
+
+    function hideLoader() {
+        setTimeout(() => {
+            const loader = document.getElementById('heartphoriaLoader');
+            if (loader) loader.classList.add('hide');
+        }, 1500);
+    }
 
     // Smart Keyboard Scroll
     document.querySelectorAll('.form-auto-scroll').forEach(input => {
@@ -939,13 +1292,25 @@
         document.getElementById(`nav-${tab}`).classList.add('active');
 
         const titleEl = document.getElementById('headerTitle');
+        const saveBtn = document.getElementById('headerSaveBtn');
+        
         titleEl.style.opacity = '0';
         titleEl.style.transform = 'scale(0.88)';
+        if (saveBtn) saveBtn.style.opacity = '0';
         
         setTimeout(() => {
             titleEl.textContent = TITLES[tab];
             titleEl.style.opacity = '1';
             titleEl.style.transform = 'scale(1)';
+            
+            if (tab === 'profile') {
+                if (saveBtn) {
+                    saveBtn.style.display = 'block';
+                    setTimeout(() => saveBtn.style.opacity = '1', 50);
+                }
+            } else {
+                if (saveBtn) saveBtn.style.display = 'none';
+            }
         }, 160);
 
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -973,11 +1338,14 @@
     async function initFeed() {
         if (feedLoaded && profiles.length > 0) { 
             renderCards(); 
+            hideLoader();
             return; 
         }
-        if (feedLoaded) return;
+        if (feedLoaded) {
+            hideLoader();
+            return;
+        }
         
-        // Anti-Double Fetch 
         feedLoaded = true;
 
         const stack = document.getElementById('cardStack');
@@ -1000,6 +1368,7 @@
         }
 
         renderCards();
+        hideLoader();
     }
 
     function renderCards() {
@@ -1014,7 +1383,7 @@
             controls.style.pointerEvents = 'none';
             stack.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-icon"><span class="material-symbols-outlined">radar</span></div>
+                    <div class="empty-icon"><span class="material-symbols-outlined icon-spin">radar</span></div>
                     <p class="empty-title">Radar Empty</p>
                     <p class="empty-sub">No new profiles nearby.<br>Check back soon!</p>
                 </div>`;
@@ -1041,7 +1410,7 @@
             card.className = `tinder-card${isTop ? ' top' : ''}`;
             card.id = `card-${p.telegram_id}`;
             card.style.zIndex = visible.length - i;
-            card.style.transform = `translate(${transX}px, ${transY}px) scale(${scaleY}) rotate(${randRot}deg)`;
+            card.style.transform = `translate3d(${transX}px, ${transY}px, 0) scale(${scaleY}) rotate(${randRot}deg)`;
 
             card.innerHTML = `
                 <div class="badge badge-like">LIKE</div>
@@ -1066,6 +1435,105 @@
             }
         }
     }
+
+    function applyDrag() {
+        rafId = null; 
+        if (!topCard) return;
+        
+        const dx = dragCurrentX;
+        const deg = dx * 0.048;
+        const dy = Math.abs(dx) * 0.04;
+        
+        topCard.style.transform = `translate3d(${dx}px, ${-dy}px, 0) rotate(${deg}deg)`;
+        
+        const t = Math.min(Math.abs(dx) / (window.innerWidth * 0.25), 1);
+        if (dx > 20) { 
+            badgeLike.style.opacity = t; 
+            badgePass.style.opacity = 0; 
+        } else if (dx < -20) { 
+            badgePass.style.opacity = t; 
+            badgeLike.style.opacity = 0; 
+        } else { 
+            badgeLike.style.opacity = 0; 
+            badgePass.style.opacity = 0; 
+        }
+    }
+
+    function onTouchEnd() {
+        if (!isDragging) return; 
+        isDragging = false; 
+        
+        if (rafId) { 
+            cancelAnimationFrame(rafId); 
+            rafId = null; 
+        }
+        
+        const threshold = window.innerWidth * 0.32;
+        
+        if (dragCurrentX > threshold) {
+            doSwipe('LIKE');
+        } else if (dragCurrentX < -threshold) {
+            doSwipe('PASS');
+        } else { 
+            topCard.classList.add('snap-back'); 
+            topCard.style.transform = `translate3d(0px, 0px, 0) scale(1) rotate(0deg)`; 
+            badgeLike.style.opacity = 0; 
+            badgePass.style.opacity = 0; 
+        }
+    }
+
+    // --- PASTIKAN KODE INI HANYA ADA SATU DI SELURUH FILE ---
+    let isSwiping = false;
+
+    window.doSwipe = async function(action) {
+        if (!profiles.length || isSwiping) return; 
+        
+        isSwiping = true;
+        const profile = profiles[0]; 
+        const card = document.getElementById(`card-${profile.telegram_id}`);
+        if (!card) {
+            isSwiping = false;
+            return;
+        }
+        
+        cleanupDrag();
+        
+        const flyX = (action === 'LIKE' ? 1 : -1) * (window.innerWidth + 100);
+        card.classList.add('fly-out'); 
+        card.style.transform = `translate3d(${flyX}px, -60px, 0) rotate(${action === 'LIKE' ? 25 : -25}deg)`; 
+        card.style.opacity = '0';
+        
+        if (action === 'LIKE') {
+            tg.HapticFeedback.notificationOccurred('success');
+        } else {
+            tg.HapticFeedback.impactOccurred('light');
+        }
+        
+        profiles.shift();
+        
+        setTimeout(() => { 
+            card.remove(); 
+            renderCards(); 
+            isSwiping = false;
+        }, 340);
+        
+        fetch(`${API}/api/swipe`, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ 
+                liker_id: tgId, 
+                liked_id: profile.telegram_id, 
+                action: action 
+            }) 
+        })
+        .then(res => res.json())
+        .then(data => { 
+            if (data.isMatch) showMatch(); 
+        })
+        .catch(err => {
+            console.error(err);
+        });
+    };
 
     function setupDrag(card) { 
         card.addEventListener('touchstart', onTouchStart, { passive: true }); 
@@ -1148,49 +1616,7 @@
         }
     }
 
-    window.doSwipe = async function(action) {
-        if (!profiles.length) return;
-        
-        const profile = profiles[0]; 
-        const card = document.getElementById(`card-${profile.telegram_id}`);
-        if (!card) return; 
-        
-        cleanupDrag();
-        
-        const flyX = (action === 'LIKE' ? 1 : -1) * (window.innerWidth + 80);
-        card.classList.add('fly-out'); 
-        card.style.transform = `translate(${flyX}px, -40px) rotate(${action === 'LIKE' ? 22 : -22}deg)`; 
-        card.style.opacity = '0';
-        
-        if (action === 'LIKE') {
-            tg.HapticFeedback.notificationOccurred('success');
-        } else {
-            tg.HapticFeedback.impactOccurred('light');
-        }
-        
-        profiles.shift();
-        
-        setTimeout(() => { 
-            card.remove(); 
-            renderCards(); 
-        }, 340);
-        
-        // Panggil API di background (fire and forget) untuk mencegah lag UI
-        fetch(`${API}/api/swipe`, { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ 
-                liker_id: tgId, 
-                liked_id: profile.telegram_id, 
-                action: action 
-            }) 
-        })
-        .then(res => res.json())
-        .then(data => { 
-            if (data.isMatch) showMatch(); 
-        })
-        .catch(err => console.error(err));
-    };
+    
 
     /* ═══════════════════════════════════════════════════════
        LIKES & MATCHES & PROFILE
@@ -1301,19 +1727,23 @@
         }
     }
 
+    // --- MULAI COPY DARI SINI ---
     window.openChat = function(username, id) { 
-        tg.openTelegramLink(username ? `https://t.me/${username}` : `tg://user?id=${id}`); 
+        // [PERBAIKAN]: Cek apakah username tersedia dan bukan teks 'null' atau kosong
+        if (username && username.trim() !== '' && username !== 'null' && username !== 'undefined') {
+            tg.openTelegramLink(`https://t.me/${username}`); 
+        } else {
+            // Berikan notifikasi jika akun di-private
+            tg.showAlert('Oops! User ini memprivasi akunnya (tidak memakai username publik). Anda belum bisa memulai chat secara langsung.');
+        }
     };
+    // --- AKHIR COPY SAMPAI SINI ---
 
     let profileLoaded = false; 
     let photoBase64 = '';
 
     async function initProfile() {
         if (profileLoaded) return;
-        
-        const btn = document.getElementById('btnSave'); 
-        btn.textContent = 'Loading…'; 
-        btn.disabled = true;
         
         try {
             const res = await fetch(`${API}/api/profile?tg_id=${tgId}`); 
@@ -1323,6 +1753,7 @@
                 const u = data.user;
                 document.getElementById('editName').value = u.name || ''; 
                 document.getElementById('editCity').value = u.location_city || ''; 
+                document.getElementById('editProvince').value = u.location_province || ''; 
                 document.getElementById('editPref').value = u.preference || 'EVERYONE'; 
                 document.getElementById('editBio').value = u.bio || ''; 
                 document.getElementById('photoPreview').src = u.photo_url || 'https://via.placeholder.com/150';
@@ -1330,10 +1761,35 @@
                 profileLoaded = true;
             }
         } catch (_) {}
-        
-        btn.textContent = 'Save Changes'; 
-        btn.disabled = false;
     }
+
+    window.saveProfile = async function() {
+        tg.HapticFeedback.impactOccurred('medium'); 
+        tg.MainButton.showProgress();
+        
+        try {
+            await fetch(`${API}/api/profile`, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ 
+                    telegram_id: tgId, 
+                    name: document.getElementById('editName').value, 
+                    location: document.getElementById('editCity').value, 
+                    province: document.getElementById('editProvince').value, 
+                    preference: document.getElementById('editPref').value, 
+                    bio: document.getElementById('editBio').value, 
+                    photo_url: photoBase64 
+                }) 
+            });
+            
+            tg.HapticFeedback.notificationOccurred('success'); 
+            tg.showAlert('Profile updated!');
+        } catch (_) { 
+            tg.showAlert('Error saving profile.'); 
+        }
+        
+        tg.MainButton.hideProgress();
+    };
 
     document.getElementById('photoInput').addEventListener('change', function(e) {
         const file = e.target.files[0]; 
@@ -1367,10 +1823,11 @@
 
     window.saveProfile = async function() {
         tg.HapticFeedback.impactOccurred('medium'); 
-        
-        const btn = document.getElementById('btnSave'); 
-        btn.textContent = 'Saving…'; 
-        btn.disabled = true;
+        const saveBtn = document.getElementById('headerSaveBtn');
+        if (saveBtn) {
+            saveBtn.textContent = '...';
+            saveBtn.disabled = true;
+        }
         
         try {
             await fetch(`${API}/api/profile`, { 
@@ -1380,6 +1837,7 @@
                     telegram_id: tgId, 
                     name: document.getElementById('editName').value, 
                     location: document.getElementById('editCity').value, 
+                    province: document.getElementById('editProvince').value, 
                     preference: document.getElementById('editPref').value, 
                     bio: document.getElementById('editBio').value, 
                     photo_url: photoBase64 
@@ -1392,8 +1850,10 @@
             tg.showAlert('Error saving profile.'); 
         }
         
-        btn.textContent = 'Save Changes'; 
-        btn.disabled = false;
+        if (saveBtn) {
+            saveBtn.textContent = 'Save';
+            saveBtn.disabled = false;
+        }
     };
 
     function showMatch() { 

@@ -14,7 +14,7 @@ export async function handleBotUpdate(update: any, env: Env) {
     const from = message.from;
 
     // TODO: Ganti URL ini nanti dengan URL Cloudflare Pages tempat Mini App di-deploy
-    const MINI_APP_URL = "https://bauhaus-match-app.pages.dev"; 
+    const MINI_APP_URL = "https://main.bauhaus-match-app.pages.dev/?v=3.0"; 
 
     try {
         // 1. Cek apakah user sudah ada di database D1

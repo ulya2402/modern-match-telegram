@@ -17,25 +17,35 @@ export async function handleOnboardingAPI(request: Request, env: Env, ctx: Execu
 
     try {
         const data = (await request.json()) as any;
-        console.log(`[API] Menerima data onboarding untuk User: ${data.telegram_id}`);
+        console.log(`Received onboarding data for user: ${data.telegram_id}`);
 
-        // Pastikan is_onboarding_complete diset ke 1
-await env.DB.prepare(`
-    INSERT INTO users (telegram_id, username, name, gender, location_city, preference, bio, photo_url, is_onboarding_complete)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
-    ON CONFLICT(telegram_id) DO UPDATE SET
-        name = excluded.name,
-        gender = excluded.gender,
-        location_city = excluded.location_city,
-        preference = excluded.preference,
-        bio = excluded.bio,
-        photo_url = excluded.photo_url,
-        is_onboarding_complete = 1
-`).bind(data.telegram_id, data.username, data.name, data.gender, data.location, data.preference, data.bio, data.photo_url).run();
+        await env.DB.prepare(`
+            INSERT INTO users (telegram_id, username, name, gender, location_city, location_province, preference, bio, photo_url, is_onboarding_complete)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+            ON CONFLICT(telegram_id) DO UPDATE SET
+                name = excluded.name,
+                gender = excluded.gender,
+                location_city = excluded.location_city,
+                location_province = excluded.location_province,
+                preference = excluded.preference,
+                bio = excluded.bio,
+                photo_url = excluded.photo_url,
+                is_onboarding_complete = 1
+        `).bind(
+            data.telegram_id, 
+            data.username || "", 
+            data.name || "", 
+            data.gender || "", 
+            data.location || "", 
+            data.province || "", 
+            data.preference || "", 
+            data.bio || "", 
+            data.photo_url || ""
+        ).run();
 
         return new Response(JSON.stringify({ success: true }), { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders() } });
     } catch (error: any) {
-        console.error(`[API ERROR] Onboarding gagal: ${error.message}`);
+        console.error(`Onboarding failed: ${error.message}`);
         return new Response(JSON.stringify({ success: false, error: error.message }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders() } });
     }
 }
@@ -65,6 +75,8 @@ export async function handleCheckUserAPI(request: Request, env: Env) {
     }
 }
 // 3. API Discovery Feed (Mengambil daftar profil untuk di-swipe)
+// --- MULAI COPY DARI SINI ---
+// 3. API Discovery Feed (Mengambil daftar profil untuk di-swipe)
 export async function handleDiscoveryAPI(request: Request, env: Env) {
     if (request.method === "OPTIONS") return new Response(null, { headers: corsHeaders() });
     
@@ -72,34 +84,51 @@ export async function handleDiscoveryAPI(request: Request, env: Env) {
     const tgId = url.searchParams.get("tg_id");
 
     try {
-        const currentUser = await env.DB.prepare("SELECT preference FROM users WHERE telegram_id = ?").bind(tgId).first();
-        if (!currentUser) throw new Error("User tidak ditemukan");
+        const currentUser = await env.DB.prepare("SELECT gender, preference, location_city, location_province, location_country FROM users WHERE telegram_id = ?").bind(tgId).first();
+        if (!currentUser) throw new Error("User not found");
 
-        const pref = currentUser.preference;
-        
-        // Ambil profil selain dirinya sendiri, yang belum di swipe, dan sesuai preferensi
+        const myGender = currentUser.gender;
+        const myPref = currentUser.preference;
+        const myCity = currentUser.location_city || "";
+        const myProvince = currentUser.location_province || "";
+        const myCountry = currentUser.location_country || "";
+
         let query = `
-            SELECT telegram_id, name, bio, photo_url, location_city 
+            SELECT telegram_id, name, bio, photo_url, location_city,
+            (
+                CASE
+                    WHEN location_city = ? AND location_city != '' THEN 1
+                    WHEN location_province = ? AND location_province != '' THEN 2
+                    WHEN location_country = ? AND location_country != '' THEN 3
+                    ELSE 4
+                END
+            ) as location_score
             FROM users 
             WHERE telegram_id != ? AND is_onboarding_complete = 1
             AND telegram_id NOT IN (SELECT liked_telegram_id FROM likes WHERE liker_telegram_id = ?)
         `;
-        let params: any[] = [tgId, tgId];
+        
+        let params: any[] = [myCity, myProvince, myCountry, tgId, tgId];
 
-        if (pref !== 'EVERYONE') {
+        if (myPref !== 'EVERYONE') {
             query += ` AND gender = ?`;
-            params.push(pref);
+            params.push(myPref);
         }
 
-        query += ` LIMIT 15`; // Maksimal 15 profil per request agar ringan
+        query += ` AND (preference = ? OR preference = 'EVERYONE')`;
+        params.push(myGender);
+
+        query += ` ORDER BY location_score ASC LIMIT 15`;
 
         const { results } = await env.DB.prepare(query).bind(...params).all();
 
         return new Response(JSON.stringify({ success: true, profiles: results }), { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders() } });
     } catch (error: any) {
+        console.error(`Discovery API error: ${error.message}`);
         return new Response(JSON.stringify({ success: false, error: error.message }), { status: 500, headers: corsHeaders() });
     }
 }
+// --- AKHIR COPY SAMPAI SINI ---
 
 // 4. API Swipe Action (Menangani tombol Suka / Lewati)
 export async function handleSwipeAPI(request: Request, env: Env, ctx: ExecutionContext) {
@@ -145,7 +174,7 @@ export async function handleSwipeAPI(request: Request, env: Env, ctx: ExecutionC
                     const lang = likedUser ? (likedUser.language as string) : "id";
                     const text = t("like_notification", lang);
                     const btn = t("btn_open_app", lang);
-                    const MINI_APP_URL = "https://bauhaus-match-app.pages.dev";
+                    const MINI_APP_URL = "https://main.bauhaus-match-app.pages.dev/?v=3.0";
                     
                     await sendMessageWithMiniApp(env.TELEGRAM_BOT_TOKEN, liked_id, text, btn, MINI_APP_URL);
                 } catch (e) { console.error("[NOTIF ERROR]", e); }
@@ -153,7 +182,7 @@ export async function handleSwipeAPI(request: Request, env: Env, ctx: ExecutionC
         } else if (isMatch) {
             ctx.waitUntil((async () => {
                 try {
-                    const MINI_APP_URL = "https://bauhaus-match-app.pages.dev";
+                    const MINI_APP_URL = "https://main.bauhaus-match-app.pages.dev/?v=3.0";
                     const notifText = "🎉 IT'S A MATCH! Seseorang baru saja membalas LIKE kamu. Buka app untuk mengobrol!";
                     const btnText = "LIHAT MATCHES ↗️";
                     // Kirim ke keduanya
@@ -248,8 +277,7 @@ export async function handleProfileAPI(request: Request, env: Env) {
             const url = new URL(request.url);
             const tgId = url.searchParams.get("tg_id");
             
-            // Gunakan .all() lalu ambil index [0] agar lebih aman di D1 Cloudflare
-            const { results } = await env.DB.prepare("SELECT name, gender, location_city, preference, bio, photo_url FROM users WHERE telegram_id = ?").bind(tgId).all();
+            const { results } = await env.DB.prepare("SELECT name, gender, location_city, location_province, preference, bio, photo_url FROM users WHERE telegram_id = ?").bind(tgId).all();
             const user = results.length > 0 ? results[0] : null;
 
             return new Response(JSON.stringify({ success: true, user: user }), { 
@@ -260,8 +288,8 @@ export async function handleProfileAPI(request: Request, env: Env) {
         if (request.method === "POST") {
             const data = await request.json() as any;
             await env.DB.prepare(`
-                UPDATE users SET name = ?, location_city = ?, preference = ?, bio = ?, photo_url = ? WHERE telegram_id = ?
-            `).bind(data.name, data.location, data.preference, data.bio, data.photo_url, data.telegram_id).run();
+                UPDATE users SET name = ?, location_city = ?, location_province = ?, preference = ?, bio = ?, photo_url = ? WHERE telegram_id = ?
+            `).bind(data.name, data.location, data.province, data.preference, data.bio, data.photo_url, data.telegram_id).run();
             
             return new Response(JSON.stringify({ success: true }), { 
                 status: 200, headers: { "Content-Type": "application/json", ...corsHeaders() } 
@@ -271,7 +299,7 @@ export async function handleProfileAPI(request: Request, env: Env) {
         return new Response("Method Not Allowed", { status: 405, headers: corsHeaders() });
 
     } catch (error: any) {
-        console.error("[API PROFILE ERROR]", error.message);
+        console.error(`Profile API error: ${error.message}`);
         return new Response(JSON.stringify({ success: false, error: error.message }), { 
             status: 500, headers: corsHeaders() 
         });

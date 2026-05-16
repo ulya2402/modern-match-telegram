@@ -3,116 +3,58 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>Loading Modern Match</title>
+    <title>Heartphoria</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,200,0..1,0" rel="stylesheet" />
     <style>
-        /* CSS Variables untuk Light / Dark Mode */
-        :root {
-            --bg: #FAFAF8;
-            --text: #111827;
-            --orb-1: rgba(254, 215, 170, 0.6);
-            --orb-2: rgba(234, 88, 12, 0.15);
-        }
-
-        html.dark {
-            --bg: #1A1208;
-            --text: #F9FAFB;
-            --orb-1: rgba(234, 88, 12, 0.15);
-            --orb-2: rgba(120, 53, 15, 0.4);
-        }
-
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: var(--bg); 
-            height: 100dvh; 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            overflow: hidden;
-            transition: background-color 0.3s ease;
-        }
-
-        .ambient-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-        .aurora-orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.6; transform: translateZ(0); animation: floatOrb 20s infinite ease-in-out alternate; transition: background 0.3s ease; }
-        
-        .orb-1 { width: 300px; height: 300px; background: var(--orb-1); top: -10%; left: -10%; }
-        .orb-2 { width: 350px; height: 350px; background: var(--orb-2); bottom: -10%; right: -10%; }
-        
-        @keyframes floatOrb { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, -30px) scale(1.1); } }
-        
-        .loader-bar { width: 120px; height: 4px; background: rgba(234, 88, 12, 0.1); border-radius: 10px; margin: 20px auto; overflow: hidden; position: relative; }
-        .loader-progress { width: 40%; height: 100%; background: #EA580C; border-radius: 10px; animation: loading 1.5s infinite ease-in-out; }
-        @keyframes loading { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
-        
-        .title-text { color: var(--text); transition: color 0.3s ease; }
+        /* Hanya warna dasar agar tidak berkedip putih saat pindah halaman */
+        :root { --bg: #FAFAF8; }
+        html.dark { --bg: #1A1208; }
+        body { background: var(--bg); height: 100dvh; margin: 0; overflow: hidden; }
+    
     </style>
 </head>
 <body>
-    <div class="ambient-canvas">
-        <div class="aurora-orb orb-1"></div>
-        <div class="aurora-orb orb-2"></div>
-    </div>
-    
-    <div style="z-index:10; text-align:center;">
-        <h1 class="text-2xl font-extrabold title-text tracking-tighter">MODERN MATCH</h1>
-        <div class="loader-bar"><div class="loader-progress"></div></div>
-    </div>
-
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // ─── LOGIKA AUTO DARK MODE ───
-        function applyTelegramTheme() {
-            if (tg.colorScheme === 'dark') {
-                document.documentElement.classList.add('dark');
-                tg.setBackgroundColor('#1A1208'); 
-                tg.setHeaderColor('#1A1208');
-            } else {
-                document.documentElement.classList.remove('dark');
-                tg.setBackgroundColor('#FAFAF8'); 
-                tg.setHeaderColor('#FAFAF8');
-            }
+        // Samakan warna background dengan tema Telegram
+        if (tg.colorScheme === 'dark') {
+            document.documentElement.classList.add('dark');
+            tg.setBackgroundColor('#1A1208'); 
+            tg.setHeaderColor('#1A1208');
+        } else {
+            tg.setBackgroundColor('#FAFAF8'); 
+            tg.setHeaderColor('#FAFAF8');
         }
-        applyTelegramTheme();
-        tg.onEvent('themeChanged', applyTelegramTheme);
 
-        // ─── LOGIKA CEK USER ───
         async function init() {
-            const user = tg.initDataUnsafe?.user;
-            const tgId = user?.id;
+            const tgId = tg.initDataUnsafe?.user?.id;
+            const cacheBuster = "?v=" + new Date().getTime();
 
+            // Jika error, langsung lempar ke onboarding
             if (!tgId) {
-                console.error("User ID tidak ditemukan. Pastikan dibuka di Telegram.");
-                setTimeout(() => window.location.href = 'onboarding.html', 2000);
+                window.location.replace('onboarding.html' + cacheBuster);
                 return;
             }
 
             try {
-                // TODO: Pastikan URL Worker Anda Benar
+                // Proses cek user ke database secepat kilat
                 const API_BASE = "https://bauhaus-match-bot.botgampang123.workers.dev"; 
                 const res = await fetch(`${API_BASE}/api/user?tg_id=${tgId}`);
                 const data = await res.json();
 
-                console.log("Status User:", data);
-
-                setTimeout(() => {
-                    if (data.exists && (data.is_onboarding_complete == 1 || data.is_onboarding_complete === true)) {
-                        window.location.href = 'app.html';
-                    } else {
-                        window.location.href = 'onboarding.html';
-                    }
-                }, 1000);
+                // TANPA DELAY / TIMEOUT - Langsung Pindah!
+                if (data.exists && (data.is_onboarding_complete == 1 || data.is_onboarding_complete === true)) {
+                    window.location.replace('app.html' + cacheBuster);
+                } else {
+                    window.location.replace('onboarding.html' + cacheBuster);
+                }
             } catch (e) {
-                console.error("Gagal cek user:", e);
-                window.location.href = 'onboarding.html';
+                window.location.replace('onboarding.html' + cacheBuster);
             }
         }
+        
         init();
     </script>
 </body>
